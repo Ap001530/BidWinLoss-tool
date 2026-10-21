@@ -226,6 +226,10 @@ def main():
             row_contribs[parent] = row_contribs.get(parent, 0.0) + float(val)
         top_pos = sorted(row_contribs.items(), key=lambda kv: -kv[1])[:3]
         top_neg = sorted(row_contribs.items(), key=lambda kv: kv[1])[:3]
+
+        def nn(v):  # NaN -> None, so every value round-trips through JSON cleanly
+            return None if pd.isna(v) else v
+
         examples.append(
             {
                 "client_segment": row["client_segment"],
@@ -234,6 +238,19 @@ def main():
                 "actual_outcome": "Won" if int(df.loc[idx, "win"]) == 1 else "Lost",
                 "top_positive_factors": [{"feature": f, "contribution": round(v, 3)} for f, v in top_pos],
                 "top_negative_factors": [{"feature": f, "contribution": round(v, 3)} for f, v in top_neg],
+                "features": {
+                    "relationship_history": int(row["relationship_history"]),
+                    "deal_origin_inbound": int(row["deal_origin_inbound"]),
+                    "pre_rfp_engagement": nn(row["pre_rfp_engagement"]) if pd.isna(row["pre_rfp_engagement"]) else int(row["pre_rfp_engagement"]),
+                    "incumbency": row["incumbency"],
+                    "effort_person_months": round(float(row["effort_person_months"]), 1),
+                    "price_position_pct": round(float(row["price_position_pct"]), 1),
+                    "requirement_coverage": nn(row["requirement_coverage"]) if pd.isna(row["requirement_coverage"]) else round(float(row["requirement_coverage"]), 2),
+                    "portfolio_similarity": round(float(row["portfolio_similarity"]), 2),
+                    "geo_timezone_fit": round(float(row["geo_timezone_fit"]), 2),
+                    "ip_security_credentials": int(row["ip_security_credentials"]),
+                    "competing_bidders": nn(row["competing_bidders"]) if pd.isna(row["competing_bidders"]) else int(row["competing_bidders"]),
+                },
             }
         )
 

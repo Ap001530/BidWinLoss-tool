@@ -71,9 +71,9 @@
   h1 { font-family: var(--font-serif); font-weight: 500; font-size: 2rem; margin: 0 0 4px; }
   .sub { color: var(--fg-muted); margin: 0 0 32px; }
   section { margin-bottom: 36px; }
-  h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 6px; }
-  p.note { color: var(--fg-muted); font-size: 0.85rem; max-width: 62ch; margin: 0 0 16px; line-height: 1.55; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 6px; display: flex; align-items: center; gap: 6px; }
+  p.note { color: var(--fg-muted); font-size: 0.85rem; max-width: 64ch; margin: 0 0 16px; line-height: 1.55; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14.5rem), 1fr)); gap: 14px; }
   .card {
     background: var(--panel);
     border: 1px solid var(--rule);
@@ -84,13 +84,16 @@
   .card h3 {
     font-size: 0.72rem; text-transform: uppercase; letter-spacing: .05em;
     color: var(--fg-muted); font-weight: 600; margin: 0 0 6px;
+    display: flex; align-items: center; gap: 4px;
   }
   .stat { font-family: var(--font-serif); font-size: 1.9rem; font-variant-numeric: tabular-nums; }
   .stat-sub { color: var(--fg-muted); font-size: 0.78rem; margin-top: 3px; }
+  .stat-blurb { color: var(--fg-muted); font-size: 0.78rem; margin-top: 9px; line-height: 1.5; border-top: 1px solid var(--rule); padding-top: 9px; }
   .two-col { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; align-items: start; }
   @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
   .barrow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .barlabel { width: 10.5rem; flex: 0 0 auto; font-size: 0.78rem; text-align: right; color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .barlabel { width: 11.5rem; flex: 0 0 auto; font-size: 0.78rem; text-align: right; color: var(--fg-muted); display: flex; align-items: center; justify-content: flex-end; gap: 3px; overflow: hidden; }
+  .barlabel span.txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .bartrack { flex: 1; min-width: 0; height: 15px; background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
   .barfill { height: 100%; background: var(--accent); }
   .barval { width: 3.2rem; flex: 0 0 auto; font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--fg-muted); }
@@ -98,6 +101,7 @@
   th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
   th { color: var(--fg-muted); font-weight: 600; white-space: nowrap; }
   td.num, th.num { text-align: right; }
+  td.feat-cell { display: flex; align-items: center; gap: 4px; }
   .pill { display: inline-flex; align-items: center; gap: 4px; padding: 1px 9px; border-radius: 999px; font-size: 0.76rem; font-weight: 600; }
   .pill.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
   .pill.bad { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
@@ -108,7 +112,7 @@
   .cm .cell.correct { background: color-mix(in srgb, var(--ok) 16%, var(--bg)); color: var(--ok); }
   .cm .cell.wrong { background: color-mix(in srgb, var(--bad) 12%, var(--bg)); color: var(--bad); }
   .disclaimer { color: var(--fg-muted); font-size: 0.78rem; margin-top: 10px; line-height: 1.55; }
-  .examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15.5rem), 1fr)); gap: 14px; }
+  .examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 14px; }
   .ex-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
   .ex-seg { font-size: 0.78rem; color: var(--fg-muted); }
   .ex-prob { font-family: var(--font-serif); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
@@ -117,10 +121,20 @@
   .factor .fv { font-variant-numeric: tabular-nums; flex: 0 0 auto; }
   .factor .fv.pos { color: var(--ok); }
   .factor .fv.neg { color: var(--bad); }
+  .details-toggle {
+    margin-top: 10px; width: 100%; background: var(--bg); color: var(--fg); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 6px 10px; font-size: 0.76rem; font-family: var(--font-sans); cursor: pointer;
+  }
+  .details-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .details-grid { margin-top: 10px; display: grid; grid-template-columns: 1fr; gap: 5px; }
+  .details-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.76rem; padding: 3px 0; border-bottom: 1px dashed var(--rule); }
+  .details-row .dn { color: var(--fg-muted); display: flex; align-items: center; gap: 3px; }
+  .details-row .dv { font-variant-numeric: tabular-nums; text-align: right; }
   .scorer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media (max-width: 720px) { .scorer-grid { grid-template-columns: 1fr; } }
   .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
-  .field label { font-size: 0.78rem; color: var(--fg-muted); display: flex; justify-content: space-between; }
+  .field label { font-size: 0.78rem; color: var(--fg-muted); display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+  .field label .lbl { display: flex; align-items: center; gap: 3px; }
   .field label span.val { color: var(--fg); font-variant-numeric: tabular-nums; }
   .field input[type="range"] { width: 100%; accent-color: var(--accent); }
   .field select {
@@ -136,6 +150,20 @@
   .foot { color: var(--fg-muted); font-size: 0.8rem; border-top: 1px solid var(--rule); padding-top: 16px; line-height: 1.6; }
   .loading { color: var(--fg-muted); font-size: 0.85rem; }
   a { color: var(--accent); }
+
+  .info-btn {
+    appearance: none; border: 1px solid var(--rule); background: var(--panel); color: var(--fg-muted);
+    border-radius: 999px; width: 16px; height: 16px; min-width: 16px; line-height: 1; font-size: 0.68rem;
+    font-family: var(--font-sans); cursor: pointer; padding: 0; display: inline-flex; align-items: center;
+    justify-content: center; flex: 0 0 auto;
+  }
+  .info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+  #info-tooltip {
+    position: absolute; max-width: 280px; background: var(--panel); color: var(--fg);
+    border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; font-size: 0.78rem;
+    line-height: 1.5; box-shadow: 0 6px 20px rgba(0,0,0,.18); z-index: 1000; display: none;
+  }
+  #info-tooltip .tt-title { font-weight: 600; margin-bottom: 4px; display: block; }
 </style>
 </head>
 <body>
@@ -143,39 +171,52 @@
 
   <div class="banner">
     <b>Synthetic data.</b> Every number below comes from a pipeline run on synthetically generated bids
-    (<code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code>), where feature→outcome
-    relationships were encoded from the Engineering BU's documented hypotheses, not observed from real bids.
-    This validates that the pipeline recovers known signal correctly — it is not a finding about what wins
-    real Virtuos bids. See <a href="../data/methodology_synthetic_data.md">data/methodology_synthetic_data.md</a>.
+    (<code>data/generate_synthetic_bids.py</code> then <code>src/train_model.py</code>), where
+    feature-to-outcome relationships were encoded from the Engineering BU's documented hypotheses, not
+    observed from real bids. This validates that the pipeline recovers known signal correctly. It is not a
+    finding about what wins real Virtuos bids. See
+    <a href="../data/methodology_synthetic_data.md">data/methodology_synthetic_data.md</a>.
   </div>
 
   <h1>Bid Competitiveness Pipeline</h1>
-  <p class="sub" id="takeaway">Loading pipeline results…</p>
+  <p class="sub" id="takeaway">Loading pipeline results...</p>
 
   <section>
     <h2>Model performance</h2>
-    <p class="note">Gradient-boosted classifier, 5-fold cross-validated, on <span id="nrows">–</span>
-      resolved bids (<span id="winrate">–</span> win rate).</p>
+    <p class="note">Gradient-boosted classifier, 5-fold cross-validated, on <span id="nrows">-</span>
+      resolved bids (<span id="winrate">-</span> win rate).</p>
     <div class="grid">
       <div class="card">
         <h3>5-fold CV AUC</h3>
-        <div class="stat" id="cvauc">–</div>
+        <div class="stat" id="cvauc">-</div>
         <div class="stat-sub" id="cvauc-sub">&nbsp;</div>
+        <div class="stat-blurb">How well the model ranks winning bids above losing ones, averaged across
+          5 separate train/test splits so the estimate is not a fluke of one split. 0.5 is a coin flip,
+          1.0 is perfect ranking.</div>
       </div>
       <div class="card">
         <h3>Held-out test AUC</h3>
-        <div class="stat" id="testauc">–</div>
+        <div class="stat" id="testauc">-</div>
         <div class="stat-sub">Single 75/25 split, 125 bids</div>
+        <div class="stat-blurb">The same ranking measure, but computed just once on 125 bids the model
+          never saw while training. More realistic, but noisier than the 5-fold figure above because it
+          comes from one split instead of five.</div>
       </div>
       <div class="card">
         <h3>Brier score</h3>
-        <div class="stat" id="brier">–</div>
+        <div class="stat" id="brier">-</div>
         <div class="stat-sub">Lower is better-calibrated</div>
+        <div class="stat-blurb">How close the model's predicted probabilities are to what actually
+          happened, averaged over every bid. 0 is a perfect forecast; 0.25 is what you would get by always
+          predicting the base win rate (about 30%) with no other information.</div>
       </div>
       <div class="card">
-        <h3>SHAP ↔ BU hypothesis rank</h3>
-        <div class="stat" id="spearman">–</div>
-        <div class="stat-sub">Spearman correlation</div>
+        <h3>SHAP vs. BU hypothesis rank</h3>
+        <div class="stat" id="spearman">-</div>
+        <div class="stat-sub">Spearman rank correlation</div>
+        <div class="stat-blurb">How closely the order SHAP found features to matter matches the order the
+          BU originally guessed they would matter. 1.0 means the two orderings agree completely, 0 means no
+          relationship between them.</div>
       </div>
     </div>
   </section>
@@ -195,19 +236,20 @@
   </section>
 
   <section>
-    <h2>What SHAP says actually drives the model</h2>
-    <p class="note">Mean absolute SHAP value per feature across all 500 bids — how much each feature
-      moves the model's predicted win probability, on average, up or down.</p>
-    <div class="card" id="shap-chart"><p class="loading">Loading…</p></div>
+    <h2>What SHAP says actually drives the model <button class="info-btn" data-key="shap" aria-label="What is SHAP?">i</button></h2>
+    <p class="note">Mean absolute SHAP value per feature across all 500 bids: how much each feature moves
+      the model's predicted win probability, on average, up or down. Click the <span class="info-btn" style="pointer-events:none;display:inline-flex">i</span>
+      next to any feature name for what it means.</p>
+    <div class="card" id="shap-chart"><p class="loading">Loading...</p></div>
   </section>
 
   <section>
     <h2>SHAP vs. the BU's documented hypotheses</h2>
-    <p class="note">The BU's feature hypotheses document ranked features by expected importance before
-      any modelling. This compares that rank to where SHAP actually places each feature after training.
-      Because the synthetic data's weights were themselves set from these hypotheses, agreement is expected
-      and is not independent confirmation — the interesting result is where the two ranks diverge, which
-      reflects noise, interaction effects, or class imbalance the model picked up that a flat reading of the
+    <p class="note">The BU's feature hypotheses document ranked features by expected importance before any
+      modelling. This compares that rank to where SHAP actually places each feature after training. Because
+      the synthetic data's weights were themselves set from these hypotheses, agreement is expected and is
+      not independent confirmation. The interesting result is where the two ranks diverge, which reflects
+      noise, interaction effects, or class imbalance the model picked up that a flat reading of the
       hypotheses would not predict.</p>
     <div class="card">
       <table>
@@ -221,24 +263,26 @@
 
   <section>
     <h2>Example bids</h2>
-    <p class="note">Eight bids sampled from the dataset with the model's predicted win probability and
-      the top factors SHAP attributes it to.</p>
+    <p class="note">Eight bids sampled from the dataset with the model's predicted win probability, the top
+      factors SHAP attributes it to, and (on request) the full set of feature values for that bid, so you
+      can see what the model was actually looking at.</p>
     <div class="examples" id="examples"></div>
   </section>
 
   <section>
     <h2>Score a hypothetical bid</h2>
-    <p class="note">Interactive estimate from a logistic-regression surrogate fit on the same synthetic
-      data (full-data AUC <span id="scorer-auc">–</span>, 5-fold CV AUC <span id="scorer-cvauc">–</span>).
-      A linear model is used here instead of the gradient-boosted model above because its decision function
-      can be evaluated exactly in the browser — every contribution shown is an exact coefficient × value
-      term, not an approximation.</p>
+    <p class="note">Interactive estimate from a logistic-regression surrogate fit on the same synthetic data
+      (full-data AUC <span id="scorer-auc">-</span>, 5-fold CV AUC <span id="scorer-cvauc">-</span>). A
+      linear model is used here instead of the gradient-boosted model above because its decision function
+      can be evaluated exactly in the browser: every contribution shown is an exact coefficient times value
+      term, not an approximation. Click the <span class="info-btn" style="pointer-events:none;display:inline-flex">i</span>
+      next to any field for what it means.</p>
     <div class="card">
       <div class="scorer-grid">
-        <div id="scorer-form"><p class="loading">Loading…</p></div>
+        <div id="scorer-form"><p class="loading">Loading...</p></div>
         <div class="scorer-result">
           <div class="gauge-track"><div class="gauge-fill" id="gauge"></div></div>
-          <div class="scorer-prob" id="scorer-prob">–</div>
+          <div class="scorer-prob" id="scorer-prob">-</div>
           <div class="scorer-label">estimated win probability</div>
           <div class="factorlist" id="scorer-factors"></div>
         </div>
@@ -247,8 +291,8 @@
   </section>
 
   <div class="foot">
-    Pipeline: <code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code> →
-    <code>outputs/model_results.json</code> → <code>dashboard/make_tables.py</code> (this page's data
+    Pipeline: <code>data/generate_synthetic_bids.py</code> then <code>src/train_model.py</code> then
+    <code>outputs/model_results.json</code> then <code>dashboard/make_tables.py</code> (this page's data
     source, under <code>docs/data/</code>). Full methodology and limitations in
     <a href="https://github.com/Ap001530/BidWinLoss-tool/blob/main/data/methodology_synthetic_data.md">data/methodology_synthetic_data.md</a>.
     Source: <a href="https://github.com/Ap001530/BidWinLoss-tool">Ap001530/BidWinLoss-tool</a>.
@@ -256,28 +300,113 @@
 
 </div>
 
+<div id="info-tooltip" role="tooltip"></div>
+
 <script>
 (function () {
   const fmtPct = (x) => d3.format(".1%")(x);
   const fmtAuc = (x) => d3.format(".3f")(x);
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
+  // Plain-English display names for each raw feature key.
   const FEATURE_LABELS = {
-    relationship_history: "Relationship history",
-    deal_origin_inbound: "Deal origin (inbound)",
-    pre_rfp_engagement: "Pre-RFP engagement",
-    incumbency: "Incumbency",
-    effort_person_months: "Effort (person-months)",
-    price_position_pct: "Price position (%)",
-    requirement_coverage: "Requirement coverage",
-    portfolio_similarity: "Portfolio similarity",
-    geo_timezone_fit: "Geo / timezone fit",
-    ip_security_credentials: "IP security credentials",
-    competing_bidders: "Competing bidders",
-    client_segment: "Client segment",
-    project_type: "Project type",
+    relationship_history: "History with this client",
+    deal_origin_inbound: "Who started the conversation",
+    pre_rfp_engagement: "Talked before the formal bid",
+    incumbency: "Starting position on this deal",
+    effort_person_months: "Project size",
+    price_position_pct: "Price vs. the market rate",
+    requirement_coverage: "How much of the brief we covered",
+    portfolio_similarity: "Relevant past work",
+    geo_timezone_fit: "Time zone overlap",
+    ip_security_credentials: "Security credentials in place",
+    competing_bidders: "Number of competing bidders",
+    client_segment: "Type of client",
+    project_type: "Type of project",
   };
-  const label = (f) => FEATURE_LABELS[f] || String(f).replace(/_/g, " ");
+
+  // One or two sentences per feature, shown when its "i" button is clicked.
+  const FEATURE_DEFS = {
+    relationship_history: "Whether this client is new to Virtuos, or a repeat client, and if a repeat client, how the last project went: poorly, fine, or well.",
+    deal_origin_inbound: "Whether the client approached Virtuos about this opportunity (inbound), or Virtuos pursued the client (outbound).",
+    pre_rfp_engagement: "Whether Virtuos had conversations with the client about the project before the official request for proposal (RFP) went out. Early conversations often mean the proposal can be shaped around what the client actually needs.",
+    incumbency: "Whether this is a brand-new opportunity with no prior vendor, work Virtuos is already doing for this client that it is defending, or work currently done by a competitor that Virtuos is trying to win away.",
+    effort_person_months: "The estimated effort for the project, in person-months. For example, 20 person-months could mean 20 people for one month, or about 2 people for 10 months.",
+    price_position_pct: "How Virtuos's quoted price compares to the typical rate for similar work. A positive number means priced above that benchmark; a negative number means priced below it.",
+    requirement_coverage: "The share of the client's stated requirements that the proposal fully addresses.",
+    portfolio_similarity: "How closely Virtuos's existing portfolio matches the kind of work this project needs.",
+    geo_timezone_fit: "How much the working hours of Virtuos's team overlap with the client's. More overlap generally means smoother day-to-day collaboration.",
+    ip_security_credentials: "Whether Virtuos already holds the data and IP security certifications this client's industry typically requires.",
+    competing_bidders: "How many other studios were bidding for the same project. Caveat: in real deployments this is often only known after the decision is made, so it should be treated cautiously as a predictive feature rather than something known for certain at bid time.",
+    client_segment: "The kind of organization issuing the bid: a large AAA publisher, a mid-size publisher, an indie studio, or a platform holder such as a console or storefront owner.",
+    project_type: "The kind of engagement being bid on: building a game from scratch (full development), co-developing with another studio, porting an existing game, ongoing live operations, or art services.",
+    shap: "SHAP (SHapley Additive exPlanations) is a method that breaks a single prediction down into the contribution of each input feature, showing how much each one pushed the predicted probability up or down.",
+  };
+
+  // Friendlier text for raw category codes.
+  const CATEGORY_LABELS = {
+    client_segment: {
+      AAA_publisher: "AAA publisher",
+      Midsize_publisher: "Mid-size publisher",
+      Indie_studio: "Indie studio",
+      Platform_holder: "Platform holder",
+    },
+    project_type: {
+      Full_development: "Full development",
+      Co_development: "Co-development",
+      Porting: "Porting",
+      Live_ops: "Live operations",
+      Art_services: "Art services",
+    },
+    incumbency: {
+      Greenfield: "New opportunity",
+      Incumbent_defend: "Defending existing work",
+      Displacement: "Replacing a competitor",
+    },
+  };
+  const RELATIONSHIP_LABELS = ["New client", "Prior client, delivery went poorly", "Prior client, delivery was fine", "Prior client, delivery went well"];
+
+  const label = (f) => FEATURE_LABELS[f] || CATEGORY_LABELS.client_segment[f] || CATEGORY_LABELS.project_type[f] || CATEGORY_LABELS.incumbency[f] || String(f).replace(/_/g, " ");
+
+  const infoBtn = (key) => FEATURE_DEFS[key] ? `<button class="info-btn" data-key="${esc(key)}" aria-label="What is ${esc(label(key))}?" aria-expanded="false">i</button>` : "";
+
+  // ---- Shared tooltip (click to open, click elsewhere or Escape to close) ----
+  const tooltip = document.getElementById("info-tooltip");
+  let openBtn = null;
+  function closeTooltip() {
+    tooltip.style.display = "none";
+    if (openBtn) openBtn.setAttribute("aria-expanded", "false");
+    openBtn = null;
+  }
+  function openTooltip(btn, key) {
+    const text = FEATURE_DEFS[key];
+    if (!text) return;
+    tooltip.innerHTML = `<span class="tt-title">${esc(label(key))}</span>${esc(text)}`;
+    tooltip.style.display = "block";
+    const r = btn.getBoundingClientRect();
+    const top = window.scrollY + r.bottom + 6;
+    let left = window.scrollX + r.left;
+    const maxLeft = window.scrollX + document.documentElement.clientWidth - 296;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    tooltip.style.top = top + "px";
+    tooltip.style.left = left + "px";
+    btn.setAttribute("aria-expanded", "true");
+    openBtn = btn;
+  }
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".info-btn[data-key]");
+    if (btn) {
+      e.stopPropagation();
+      if (openBtn === btn) { closeTooltip(); return; }
+      closeTooltip();
+      openTooltip(btn, btn.dataset.key);
+      return;
+    }
+    if (!e.target.closest("#info-tooltip")) closeTooltip();
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeTooltip(); });
+  window.addEventListener("resize", closeTooltip);
+  window.addEventListener("scroll", closeTooltip, true);
 
   const DATA_DIR = "data";
   const load = (name) => fetch(`${DATA_DIR}/${name}.json`).then((r) => {
@@ -294,8 +423,8 @@
     document.getElementById("brier").textContent = d3.format(".4f")(s.brier_score);
     document.getElementById("spearman").textContent = d3.format(".2f")(s.spearman);
     document.getElementById("takeaway").textContent =
-      `Recovers known signal at AUC ${fmtAuc(s.cv_auc_mean)} (5-fold CV); ` +
-      `SHAP ranking agrees with the BU's stated hypotheses at ρ = ${d3.format(".2f")(s.spearman)}.`;
+      `Recovers known signal at AUC ${fmtAuc(s.cv_auc_mean)} (5-fold CV). ` +
+      `SHAP ranking agrees with the BU's stated hypotheses at rho = ${d3.format(".2f")(s.spearman)}.`;
   }
 
   function renderRoc(rows) {
@@ -339,8 +468,8 @@
     const total = s.tn + s.fp + s.fn + s.tp;
     const acc = (s.tn + s.tp) / total;
     document.getElementById("cm-note").textContent =
-      `Accuracy ${fmtPct(acc)} at the default 0.5 threshold. With a ~30% base win rate, a lower threshold ` +
-      `trades false positives for catching more true wins — AUC is the threshold-free summary above.`;
+      `Accuracy ${fmtPct(acc)} at the default 0.5 threshold. With a base win rate of about 30%, a lower ` +
+      `threshold trades false positives for catching more true wins. AUC above is the threshold-free summary.`;
   }
 
   function renderShapChart(rows) {
@@ -348,7 +477,7 @@
     const max = d3.max(data, (d) => d.mean_abs_shap);
     document.getElementById("shap-chart").innerHTML = data.map((d) => `
       <div class="barrow">
-        <div class="barlabel">${esc(label(d.feature))}</div>
+        <div class="barlabel"><span class="txt">${esc(label(d.feature))}</span>${infoBtn(d.feature)}</div>
         <div class="bartrack"><div class="barfill" style="width:${(d.mean_abs_shap / max * 100).toFixed(1)}%"></div></div>
         <div class="barval">${d3.format(".3f")(d.mean_abs_shap)}</div>
       </div>
@@ -360,10 +489,10 @@
     document.getElementById("hyp-table").innerHTML = sorted.map((d) => {
       const shift = d.delta;
       const pillClass = shift === 0 ? "neutral" : (Math.abs(shift) <= 2 ? "neutral" : (shift > 0 ? "bad" : "ok"));
-      const arrow = shift === 0 ? "—" : (shift > 0 ? `↓ ${shift}` : `↑ ${-shift}`);
+      const arrow = shift === 0 ? "No change" : (shift > 0 ? `Down ${shift}` : `Up ${-shift}`);
       return `
         <tr>
-          <td>${esc(label(d.feature))}</td>
+          <td class="feat-cell">${esc(label(d.feature))}${infoBtn(d.feature)}</td>
           <td class="num">#${d.bu_hypothesis_rank}</td>
           <td class="num">#${d.shap_rank}</td>
           <td class="num"><span class="pill ${pillClass}">${arrow}</span></td>
@@ -371,27 +500,65 @@
     }).join("");
   }
 
+  const FEATURE_ORDER = [
+    "relationship_history", "deal_origin_inbound", "pre_rfp_engagement", "incumbency",
+    "effort_person_months", "price_position_pct", "requirement_coverage", "portfolio_similarity",
+    "geo_timezone_fit", "ip_security_credentials", "competing_bidders",
+  ];
+  function formatFeatureValue(feature, value) {
+    if (value === null || value === undefined) return "Unknown";
+    switch (feature) {
+      case "relationship_history": return RELATIONSHIP_LABELS[value];
+      case "deal_origin_inbound": return value ? "Client reached out first" : "Virtuos approached the client";
+      case "pre_rfp_engagement": return value ? "Yes" : "No";
+      case "incumbency": return CATEGORY_LABELS.incumbency[value] || value;
+      case "effort_person_months": return Math.round(value) + " person-months";
+      case "price_position_pct": return (value > 0 ? "+" : "") + value.toFixed(1) + "% vs. market";
+      case "requirement_coverage": return d3.format(".0%")(value);
+      case "portfolio_similarity": return d3.format(".0%")(value);
+      case "geo_timezone_fit": return d3.format(".0%")(value) + " overlap";
+      case "ip_security_credentials": return value ? "Yes" : "No";
+      case "competing_bidders": return Math.round(value) + " bidders";
+      default: return String(value);
+    }
+  }
+
   function renderExamples(rows) {
-    document.getElementById("examples").innerHTML = rows.map((ex) => {
+    document.getElementById("examples").innerHTML = rows.map((ex, i) => {
       const won = ex.actual_outcome === "Won";
-      const pos = [1, 2, 3].map((i) => ({ feature: ex[`pos${i}_feature`], contribution: ex[`pos${i}_value`] }))
+      const pos = [1, 2, 3].map((n) => ({ feature: ex[`pos${n}_feature`], contribution: ex[`pos${n}_value`] }))
         .filter((f) => f.feature != null && f.contribution > 0);
-      const neg = [1, 2, 3].map((i) => ({ feature: ex[`neg${i}_feature`], contribution: ex[`neg${i}_value`] }))
+      const neg = [1, 2, 3].map((n) => ({ feature: ex[`neg${n}_feature`], contribution: ex[`neg${n}_value`] }))
         .filter((f) => f.feature != null && f.contribution < 0);
+      const detailRows = FEATURE_ORDER.map((f) => {
+        const v = ex[`feat_${f}`];
+        return `<div class="details-row"><span class="dn">${esc(label(f))}${infoBtn(f)}</span><span class="dv">${esc(formatFeatureValue(f, v === undefined ? null : v))}</span></div>`;
+      }).join("");
       return `
         <div class="card">
           <div class="ex-head">
             <div>
-              <div>${esc(label(ex.client_segment))}</div>
-              <div class="ex-seg">${esc(label(ex.project_type))} · actually
+              <div>${esc(CATEGORY_LABELS.client_segment[ex.client_segment] || ex.client_segment)}</div>
+              <div class="ex-seg">${esc(CATEGORY_LABELS.project_type[ex.project_type] || ex.project_type)} &middot; actually
                 <span class="pill ${won ? "ok" : "bad"}">${ex.actual_outcome}</span></div>
             </div>
             <div class="ex-prob">${fmtPct(ex.win_probability)}</div>
           </div>
-          ${pos.map((f) => `<div class="factor"><span class="fn">↑ ${esc(label(f.feature))}</span><span class="fv pos">+${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
-          ${neg.map((f) => `<div class="factor"><span class="fn">↓ ${esc(label(f.feature))}</span><span class="fv neg">${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+          ${pos.map((f) => `<div class="factor"><span class="fn">Up: ${esc(label(f.feature))}</span><span class="fv pos">+${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+          ${neg.map((f) => `<div class="factor"><span class="fn">Down: ${esc(label(f.feature))}</span><span class="fv neg">${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+          <button class="details-toggle" type="button" data-idx="${i}">Show bid details</button>
+          <div class="details-grid" id="ex-details-${i}" hidden>${detailRows}</div>
         </div>`;
     }).join("");
+
+    document.getElementById("examples").addEventListener("click", (e) => {
+      const btn = e.target.closest(".details-toggle");
+      if (!btn) return;
+      const panel = document.getElementById(`ex-details-${btn.dataset.idx}`);
+      const willShow = panel.hidden;
+      panel.hidden = !willShow;
+      btn.textContent = willShow ? "Hide bid details" : "Show bid details";
+    });
   }
 
   // ---- Interactive scorer ----
@@ -399,16 +566,16 @@
 
   function buildScorerForm(numRows, catRows, metaRow) {
     const numDefs = {
-      relationship_history: { min: 0, max: 3, step: 1, fmt: (v) => ["New", "Prior (poor)", "Prior (neutral)", "Prior (good)"][v] },
-      deal_origin_inbound: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Inbound" : "Outbound") },
-      pre_rfp_engagement: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Engaged pre-RFP" : "No pre-RFP contact") },
-      effort_person_months: { min: 10, max: 400, step: 5, fmt: (v) => v + " pm" },
-      price_position_pct: { min: -30, max: 30, step: 1, fmt: (v) => (v > 0 ? "+" : "") + v + "%" },
+      relationship_history: { min: 0, max: 3, step: 1, fmt: (v) => RELATIONSHIP_LABELS[v] },
+      deal_origin_inbound: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Client reached out first" : "Virtuos approached the client") },
+      pre_rfp_engagement: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Yes, talked before the bid" : "No prior contact") },
+      effort_person_months: { min: 10, max: 400, step: 5, fmt: (v) => v + " person-months" },
+      price_position_pct: { min: -30, max: 30, step: 1, fmt: (v) => (v > 0 ? "+" : "") + v + "% vs. market" },
       requirement_coverage: { min: 0.5, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
       portfolio_similarity: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
-      geo_timezone_fit: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
-      ip_security_credentials: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Has credentials" : "No credentials") },
-      competing_bidders: { min: 1, max: 10, step: 1, fmt: (v) => v },
+      geo_timezone_fit: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) + " overlap" },
+      ip_security_credentials: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Yes" : "No") },
+      competing_bidders: { min: 1, max: 10, step: 1, fmt: (v) => v + " bidders" },
     };
 
     numRows.forEach((r) => { scorerState[r.feature] = r.default; });
@@ -423,16 +590,16 @@
       const f = r.feature;
       const d = numDefs[f] || { min: 0, max: 1, step: 0.01, fmt: (v) => v };
       return `<div class="field">
-        <label for="f-${f}">${esc(label(f))} <span class="val" id="v-${f}">${esc(d.fmt(scorerState[f]))}</span></label>
+        <label for="f-${f}"><span class="lbl">${esc(label(f))}${infoBtn(f)}</span> <span class="val" id="v-${f}">${esc(d.fmt(scorerState[f]))}</span></label>
         <input type="range" id="f-${f}" min="${d.min}" max="${d.max}" step="${d.step}" value="${scorerState[f]}">
       </div>`;
     }).join("");
     const catHtml = catFeatures.map((f) => {
       const opts = catRows.filter((r) => r.feature === f).map((r) =>
-        `<option value="${esc(r.category)}" ${r.category === scorerState[f] ? "selected" : ""}>${esc(label(r.category))}</option>`
+        `<option value="${esc(r.category)}" ${r.category === scorerState[f] ? "selected" : ""}>${esc(CATEGORY_LABELS[f]?.[r.category] || r.category)}</option>`
       ).join("");
       return `<div class="field">
-        <label for="f-${f}">${esc(label(f))}</label>
+        <label for="f-${f}"><span class="lbl">${esc(label(f))}${infoBtn(f)}</span></label>
         <select id="f-${f}">${opts}</select>
       </div>`;
     }).join("");
@@ -463,7 +630,7 @@
       contribs.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
       const top = contribs.slice(0, 5);
       document.getElementById("scorer-factors").innerHTML = top.map((c) => {
-        const name = c.catValue ? `${label(c.feature)}: ${label(c.catValue)}` : label(c.feature);
+        const name = c.catValue ? `${label(c.feature)}: ${CATEGORY_LABELS[c.feature]?.[c.catValue] || c.catValue}` : label(c.feature);
         const cls = c.contribution >= 0 ? "pos" : "neg";
         const sign = c.contribution >= 0 ? "+" : "";
         return `<div class="factor"><span class="fn">${esc(name)}</span><span class="fv ${cls}">${sign}${d3.format(".2f")(c.contribution)}</span></div>`;

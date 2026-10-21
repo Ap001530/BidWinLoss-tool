@@ -30,17 +30,18 @@
     font-size: var(--cds-font-size-heading);
     font-weight: var(--cds-font-weight-medium);
     margin: 0 0 var(--cds-gap-sm) 0;
+    display: flex; align-items: center; gap: 6px;
   }
   .bwl-section > p.bwl-note {
     color: var(--color-fg-muted);
     font-size: var(--cds-font-size-caption);
     margin: 0 0 var(--cds-gap-md) 0;
-    max-width: 62ch;
+    max-width: 64ch;
     line-height: 1.5;
   }
   .bwl-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14.5rem), 1fr));
     gap: var(--cds-gap-md);
   }
   .bwl-card {
@@ -57,6 +58,7 @@
     color: var(--color-fg-muted);
     font-weight: var(--cds-font-weight-medium);
     margin: 0 0 var(--cds-pad-xs) 0;
+    display: flex; align-items: center; gap: 4px;
   }
   .bwl-stat {
     font-family: var(--font-anthropic-serif);
@@ -65,6 +67,7 @@
     font-variant-numeric: tabular-nums;
   }
   .bwl-stat-sub { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-top: 2px; }
+  .bwl-stat-blurb { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-top: 9px; line-height: 1.5; border-top: 1px solid var(--rule); padding-top: 9px; }
   .bwl-two-col {
     display: grid;
     grid-template-columns: 1.3fr 1fr;
@@ -74,9 +77,10 @@
   @media (max-width: 760px) { .bwl-two-col { grid-template-columns: 1fr; } }
   .bwl-barrow { display: flex; align-items: center; gap: var(--cds-gap-sm); margin-bottom: 7px; }
   .bwl-barlabel {
-    width: 10.5rem; flex: 0 0 auto; font-size: var(--cds-font-size-caption);
-    text-align: right; color: var(--color-fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    width: 11.5rem; flex: 0 0 auto; font-size: var(--cds-font-size-caption);
+    text-align: right; color: var(--color-fg-muted); display: flex; align-items: center; justify-content: flex-end; gap: 3px; overflow: hidden;
   }
+  .bwl-barlabel span.txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .bwl-bartrack { flex: 1; min-width: 0; height: 16px; background: var(--color-bg); border-radius: 4px; overflow: hidden; }
   .bwl-barfill { height: 100%; border-radius: 4px; background: var(--accent); }
   .bwl-barval { width: 3.2rem; flex: 0 0 auto; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; color: var(--color-fg-muted); }
@@ -87,6 +91,7 @@
   }
   table.bwl-table th { color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
   table.bwl-table td.bwl-num, table.bwl-table th.bwl-num { text-align: right; }
+  table.bwl-table td.bwl-feat-cell { display: flex; align-items: center; gap: 4px; }
   .bwl-pill {
     display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px;
     font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium);
@@ -99,7 +104,7 @@
   .bwl-cm .cell { padding: 10px 8px; text-align: center; border-radius: 4px; font-variant-numeric: tabular-nums; font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); }
   .bwl-cm .cell.correct { background: color-mix(in srgb, var(--color-ok) 14%, var(--color-bg)); color: var(--color-ok); }
   .bwl-cm .cell.wrong { background: color-mix(in srgb, var(--color-bad) 10%, var(--color-bg)); color: var(--color-bad); }
-  .bwl-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-md); }
+  .bwl-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-md); }
   .bwl-ex-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
   .bwl-ex-seg { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .bwl-ex-prob { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); font-variant-numeric: tabular-nums; }
@@ -108,10 +113,20 @@
   .bwl-factor .fv { font-variant-numeric: tabular-nums; flex: 0 0 auto; }
   .bwl-factor .fv.pos { color: var(--color-ok); }
   .bwl-factor .fv.neg { color: var(--color-bad); }
+  .bwl-details-toggle {
+    margin-top: 10px; width: 100%; background: var(--color-bg); color: var(--color-fg); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 6px 10px; font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); cursor: pointer;
+  }
+  .bwl-details-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .bwl-details-grid { margin-top: 10px; display: grid; grid-template-columns: 1fr; gap: 5px; }
+  .bwl-details-row { display: flex; justify-content: space-between; gap: 10px; font-size: var(--cds-font-size-caption); padding: 3px 0; border-bottom: 1px dashed var(--rule); }
+  .bwl-details-row .dn { color: var(--color-fg-muted); display: flex; align-items: center; gap: 3px; }
+  .bwl-details-row .dv { font-variant-numeric: tabular-nums; text-align: right; }
   .bwl-scorer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--cds-gap-md); }
   @media (max-width: 760px) { .bwl-scorer-grid { grid-template-columns: 1fr; } }
   .bwl-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: var(--cds-gap-sm); }
-  .bwl-field label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; justify-content: space-between; }
+  .bwl-field label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+  .bwl-field label .lbl { display: flex; align-items: center; gap: 3px; }
   .bwl-field label span.val { color: var(--color-fg); font-variant-numeric: tabular-nums; }
   .bwl-field input[type="range"] { width: 100%; accent-color: var(--accent); }
   .bwl-field select {
@@ -128,46 +143,72 @@
   .bwl-foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); border-top: 1px solid var(--rule); padding-top: var(--cds-pad-md); line-height: 1.6; }
   .bwl-foot code { font-family: var(--font-anthropic-sans); background: var(--color-bg); padding: 1px 5px; border-radius: 4px; }
   [data-dash-source-state="loading"] { opacity: .5; }
+
+  .bwl-info-btn {
+    appearance: none; border: 1px solid var(--rule); background: var(--color-panel); color: var(--color-fg-muted);
+    border-radius: 999px; width: 16px; height: 16px; min-width: 16px; line-height: 1; font-size: 0.68rem;
+    font-family: var(--font-anthropic-sans); cursor: pointer; padding: 0; display: inline-flex; align-items: center;
+    justify-content: center; flex: 0 0 auto;
+  }
+  .bwl-info-btn:hover, .bwl-info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+  #bwl-info-tooltip {
+    position: absolute; max-width: 280px; background: var(--color-panel); color: var(--color-fg);
+    border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; font-size: var(--cds-font-size-caption);
+    line-height: 1.5; box-shadow: 0 6px 20px rgba(0,0,0,.25); z-index: 1000; display: none;
+  }
+  #bwl-info-tooltip .tt-title { font-weight: var(--cds-font-weight-medium); margin-bottom: 4px; display: block; }
 </style>
 
 <div data-source="summary">
   <div class="bwl-banner">
     <b>Synthetic data.</b> Every number below comes from a pipeline run on synthetically generated bids
-    (<code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code>), where feature→outcome
-    relationships were encoded from the Engineering BU's documented hypotheses, not observed from real bids.
-    This validates that the pipeline recovers known signal correctly — it is not a finding about what wins
-    real Virtuos bids. See <code>data/methodology_synthetic_data.md</code>.
+    (<code>data/generate_synthetic_bids.py</code> then <code>src/train_model.py</code>), where
+    feature-to-outcome relationships were encoded from the Engineering BU's documented hypotheses, not
+    observed from real bids. This validates that the pipeline recovers known signal correctly. It is not a
+    finding about what wins real Virtuos bids. See <code>data/methodology_synthetic_data.md</code>.
   </div>
 
   <div class="bwl-header">
     <h1 class="bwl-title">Bid Competitiveness Pipeline</h1>
-    <p class="bwl-sub" id="bwl-takeaway">Loading pipeline results…</p>
+    <p class="bwl-sub" id="bwl-takeaway">Loading pipeline results...</p>
   </div>
 
   <div class="bwl-section">
     <h2>Model performance</h2>
-    <p class="bwl-note">Gradient-boosted classifier, 5-fold cross-validated, on <span id="bwl-nrows">–</span>
-      resolved bids (<span id="bwl-winrate">–</span> win rate).</p>
+    <p class="bwl-note">Gradient-boosted classifier, 5-fold cross-validated, on <span id="bwl-nrows">-</span>
+      resolved bids (<span id="bwl-winrate">-</span> win rate).</p>
     <div class="bwl-grid">
       <div class="bwl-card">
         <h3>5-fold CV AUC</h3>
-        <div class="bwl-stat dash-skeleton" id="bwl-cvauc">–</div>
+        <div class="bwl-stat dash-skeleton" id="bwl-cvauc">-</div>
         <div class="bwl-stat-sub" id="bwl-cvauc-sub">&nbsp;</div>
+        <div class="bwl-stat-blurb">How well the model ranks winning bids above losing ones, averaged
+          across 5 separate train/test splits so the estimate is not a fluke of one split. 0.5 is a coin
+          flip, 1.0 is perfect ranking.</div>
       </div>
       <div class="bwl-card">
         <h3>Held-out test AUC</h3>
-        <div class="bwl-stat dash-skeleton" id="bwl-testauc">–</div>
+        <div class="bwl-stat dash-skeleton" id="bwl-testauc">-</div>
         <div class="bwl-stat-sub">Single 75/25 split, 125 bids</div>
+        <div class="bwl-stat-blurb">The same ranking measure, but computed just once on 125 bids the model
+          never saw while training. More realistic, but noisier than the 5-fold figure above because it
+          comes from one split instead of five.</div>
       </div>
       <div class="bwl-card">
         <h3>Brier score</h3>
-        <div class="bwl-stat dash-skeleton" id="bwl-brier">–</div>
+        <div class="bwl-stat dash-skeleton" id="bwl-brier">-</div>
         <div class="bwl-stat-sub">Lower is better-calibrated</div>
+        <div class="bwl-stat-blurb">How close the model's predicted probabilities are to what actually
+          happened, averaged over every bid. 0 is a perfect forecast; 0.25 is what you would get by always
+          predicting the base win rate (about 30%) with no other information.</div>
       </div>
       <div class="bwl-card">
-        <h3>SHAP ↔ BU hypothesis rank</h3>
-        <div class="bwl-stat dash-skeleton" id="bwl-spearman">–</div>
-        <div class="bwl-stat-sub">Spearman correlation</div>
+        <h3>SHAP vs. BU hypothesis rank</h3>
+        <div class="bwl-stat dash-skeleton" id="bwl-spearman">-</div>
+        <div class="bwl-stat-sub">Spearman rank correlation</div>
+        <div class="bwl-stat-blurb">How closely the order SHAP found features to matter matches the order
+          the BU originally guessed they would matter. 1.0 means the two orderings agree completely, 0
+          means no relationship between them.</div>
       </div>
     </div>
   </div>
@@ -187,9 +228,11 @@
   </div>
 
   <div class="bwl-section" data-source="shap_importance">
-    <h2>What SHAP says actually drives the model</h2>
-    <p class="bwl-note">Mean absolute SHAP value per feature across all 500 bids — how much each feature
-      moves the model's predicted win probability, on average, up or down.</p>
+    <h2>What SHAP says actually drives the model <button class="bwl-info-btn" data-key="shap" aria-label="What is SHAP?" aria-expanded="false">i</button></h2>
+    <p class="bwl-note">Mean absolute SHAP value per feature across all 500 bids: how much each feature
+      moves the model's predicted win probability, on average, up or down. Click the
+      <span class="bwl-info-btn" style="pointer-events:none;display:inline-flex">i</span> next to any
+      feature name for what it means.</p>
     <div class="bwl-card" id="bwl-shap-chart"></div>
   </div>
 
@@ -198,9 +241,9 @@
     <p class="bwl-note">The BU's feature hypotheses document ranked features by expected importance before
       any modelling. This compares that rank to where SHAP actually places each feature after training.
       Because the synthetic data's weights were themselves set from these hypotheses, agreement is expected
-      and is not independent confirmation — the interesting result is where the two ranks diverge, which
-      reflects noise, interaction effects, or class imbalance the model picked up that a flat reading of the
-      hypotheses would not predict.</p>
+      and is not independent confirmation. The interesting result is where the two ranks diverge, which
+      reflects noise, interaction effects, or class imbalance the model picked up that a flat reading of
+      the hypotheses would not predict.</p>
     <div class="bwl-card">
       <table class="bwl-table">
         <thead>
@@ -213,8 +256,9 @@
 
   <div class="bwl-section" data-source="examples">
     <h2>Example bids</h2>
-    <p class="bwl-note">Eight bids sampled from the dataset with the model's predicted win probability and
-      the top factors SHAP attributes it to.</p>
+    <p class="bwl-note">Eight bids sampled from the dataset with the model's predicted win probability, the
+      top factors SHAP attributes it to, and (on request) the full set of feature values for that bid, so
+      you can see what the model was actually looking at.</p>
     <div class="bwl-examples" id="bwl-examples"></div>
   </div>
 </div>
@@ -222,16 +266,17 @@
 <div class="bwl-section" data-source="scorer_num scorer_cat scorer_meta">
   <h2>Score a hypothetical bid</h2>
   <p class="bwl-note">Interactive estimate from a logistic-regression surrogate fit on the same synthetic
-    data (full-data AUC <span id="bwl-scorer-auc">–</span>, 5-fold CV AUC <span id="bwl-scorer-cvauc">–</span>).
+    data (full-data AUC <span id="bwl-scorer-auc">-</span>, 5-fold CV AUC <span id="bwl-scorer-cvauc">-</span>).
     A linear model is used here instead of the gradient-boosted model above because its decision function
-    can be evaluated exactly in the browser — every contribution shown is an exact coefficient × value term,
-    not an approximation.</p>
+    can be evaluated exactly in the browser: every contribution shown is an exact coefficient times value
+    term, not an approximation. Click the <span class="bwl-info-btn" style="pointer-events:none;display:inline-flex">i</span>
+    next to any field for what it means.</p>
   <div class="bwl-card">
     <div class="bwl-scorer-grid">
       <div id="bwl-scorer-form"></div>
       <div class="bwl-scorer-result">
         <div class="bwl-gauge-track"><div class="bwl-gauge-fill" id="bwl-gauge"></div></div>
-        <div class="bwl-scorer-prob" id="bwl-scorer-prob">–</div>
+        <div class="bwl-scorer-prob" id="bwl-scorer-prob">-</div>
         <div class="bwl-scorer-label">estimated win probability</div>
         <div class="bwl-factorlist" id="bwl-scorer-factors"></div>
       </div>
@@ -240,10 +285,12 @@
 </div>
 
 <div class="bwl-foot">
-  Pipeline: <code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code> →
+  Pipeline: <code>data/generate_synthetic_bids.py</code> then <code>src/train_model.py</code> then
   <code>outputs/model_results.json</code> (split into per-section datasets for this dashboard). Full
   methodology and limitations in <code>data/methodology_synthetic_data.md</code>.
 </div>
+
+<div id="bwl-info-tooltip" role="tooltip"></div>
 
 <script>
 (function () {
@@ -252,21 +299,100 @@
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
   const FEATURE_LABELS = {
-    relationship_history: "Relationship history",
-    deal_origin_inbound: "Deal origin (inbound)",
-    pre_rfp_engagement: "Pre-RFP engagement",
-    incumbency: "Incumbency",
-    effort_person_months: "Effort (person-months)",
-    price_position_pct: "Price position (%)",
-    requirement_coverage: "Requirement coverage",
-    portfolio_similarity: "Portfolio similarity",
-    geo_timezone_fit: "Geo / timezone fit",
-    ip_security_credentials: "IP security credentials",
-    competing_bidders: "Competing bidders",
-    client_segment: "Client segment",
-    project_type: "Project type",
+    relationship_history: "History with this client",
+    deal_origin_inbound: "Who started the conversation",
+    pre_rfp_engagement: "Talked before the formal bid",
+    incumbency: "Starting position on this deal",
+    effort_person_months: "Project size",
+    price_position_pct: "Price vs. the market rate",
+    requirement_coverage: "How much of the brief we covered",
+    portfolio_similarity: "Relevant past work",
+    geo_timezone_fit: "Time zone overlap",
+    ip_security_credentials: "Security credentials in place",
+    competing_bidders: "Number of competing bidders",
+    client_segment: "Type of client",
+    project_type: "Type of project",
   };
-  const label = (f) => FEATURE_LABELS[f] || String(f).replace(/_/g, " ");
+
+  const FEATURE_DEFS = {
+    relationship_history: "Whether this client is new to Virtuos, or a repeat client, and if a repeat client, how the last project went: poorly, fine, or well.",
+    deal_origin_inbound: "Whether the client approached Virtuos about this opportunity (inbound), or Virtuos pursued the client (outbound).",
+    pre_rfp_engagement: "Whether Virtuos had conversations with the client about the project before the official request for proposal (RFP) went out. Early conversations often mean the proposal can be shaped around what the client actually needs.",
+    incumbency: "Whether this is a brand-new opportunity with no prior vendor, work Virtuos is already doing for this client that it is defending, or work currently done by a competitor that Virtuos is trying to win away.",
+    effort_person_months: "The estimated effort for the project, in person-months. For example, 20 person-months could mean 20 people for one month, or about 2 people for 10 months.",
+    price_position_pct: "How Virtuos's quoted price compares to the typical rate for similar work. A positive number means priced above that benchmark; a negative number means priced below it.",
+    requirement_coverage: "The share of the client's stated requirements that the proposal fully addresses.",
+    portfolio_similarity: "How closely Virtuos's existing portfolio matches the kind of work this project needs.",
+    geo_timezone_fit: "How much the working hours of Virtuos's team overlap with the client's. More overlap generally means smoother day-to-day collaboration.",
+    ip_security_credentials: "Whether Virtuos already holds the data and IP security certifications this client's industry typically requires.",
+    competing_bidders: "How many other studios were bidding for the same project. Caveat: in real deployments this is often only known after the decision is made, so it should be treated cautiously as a predictive feature rather than something known for certain at bid time.",
+    client_segment: "The kind of organization issuing the bid: a large AAA publisher, a mid-size publisher, an indie studio, or a platform holder such as a console or storefront owner.",
+    project_type: "The kind of engagement being bid on: building a game from scratch (full development), co-developing with another studio, porting an existing game, ongoing live operations, or art services.",
+    shap: "SHAP (SHapley Additive exPlanations) is a method that breaks a single prediction down into the contribution of each input feature, showing how much each one pushed the predicted probability up or down.",
+  };
+
+  const CATEGORY_LABELS = {
+    client_segment: {
+      AAA_publisher: "AAA publisher",
+      Midsize_publisher: "Mid-size publisher",
+      Indie_studio: "Indie studio",
+      Platform_holder: "Platform holder",
+    },
+    project_type: {
+      Full_development: "Full development",
+      Co_development: "Co-development",
+      Porting: "Porting",
+      Live_ops: "Live operations",
+      Art_services: "Art services",
+    },
+    incumbency: {
+      Greenfield: "New opportunity",
+      Incumbent_defend: "Defending existing work",
+      Displacement: "Replacing a competitor",
+    },
+  };
+  const RELATIONSHIP_LABELS = ["New client", "Prior client, delivery went poorly", "Prior client, delivery was fine", "Prior client, delivery went well"];
+
+  const label = (f) => FEATURE_LABELS[f] || CATEGORY_LABELS.client_segment[f] || CATEGORY_LABELS.project_type[f] || CATEGORY_LABELS.incumbency[f] || String(f).replace(/_/g, " ");
+
+  const infoBtn = (key) => FEATURE_DEFS[key] ? `<button class="bwl-info-btn" data-key="${esc(key)}" aria-label="What is ${esc(label(key))}?" aria-expanded="false">i</button>` : "";
+
+  const tooltip = document.getElementById("bwl-info-tooltip");
+  let openBtn = null;
+  function closeTooltip() {
+    tooltip.style.display = "none";
+    if (openBtn) openBtn.setAttribute("aria-expanded", "false");
+    openBtn = null;
+  }
+  function openTooltip(btn, key) {
+    const text = FEATURE_DEFS[key];
+    if (!text) return;
+    tooltip.innerHTML = `<span class="tt-title">${esc(label(key))}</span>${esc(text)}`;
+    tooltip.style.display = "block";
+    const r = btn.getBoundingClientRect();
+    const top = window.scrollY + r.bottom + 6;
+    let left = window.scrollX + r.left;
+    const maxLeft = window.scrollX + document.documentElement.clientWidth - 296;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    tooltip.style.top = top + "px";
+    tooltip.style.left = left + "px";
+    btn.setAttribute("aria-expanded", "true");
+    openBtn = btn;
+  }
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".bwl-info-btn[data-key]");
+    if (btn) {
+      e.stopPropagation();
+      if (openBtn === btn) { closeTooltip(); return; }
+      closeTooltip();
+      openTooltip(btn, btn.dataset.key);
+      return;
+    }
+    if (!e.target.closest("#bwl-info-tooltip")) closeTooltip();
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeTooltip(); });
+  window.addEventListener("resize", closeTooltip);
+  window.addEventListener("scroll", closeTooltip, true);
 
   function renderPerformance(s) {
     document.getElementById("bwl-nrows").textContent = d3.format(",")(s.n_rows);
@@ -277,9 +403,9 @@
     document.getElementById("bwl-brier").textContent = d3.format(".4f")(s.brier_score);
     document.getElementById("bwl-spearman").textContent = d3.format(".2f")(s.spearman);
 
-    const take = document.getElementById("bwl-takeaway");
-    take.textContent = `Recovers known signal at AUC ${fmtAuc(s.cv_auc_mean)} (5-fold CV); ` +
-      `SHAP ranking agrees with the BU's stated hypotheses at ρ = ${d3.format(".2f")(s.spearman)}.`;
+    document.getElementById("bwl-takeaway").textContent =
+      `Recovers known signal at AUC ${fmtAuc(s.cv_auc_mean)} (5-fold CV). ` +
+      `SHAP ranking agrees with the BU's stated hypotheses at rho = ${d3.format(".2f")(s.spearman)}.`;
 
     document.querySelectorAll(".dash-skeleton").forEach((el) => el.classList.remove("dash-skeleton"));
   }
@@ -317,8 +443,7 @@
   }
 
   function renderConfusion(s) {
-    const root = document.getElementById("bwl-cm");
-    root.innerHTML = `
+    document.getElementById("bwl-cm").innerHTML = `
       <div></div><div class="hd">Predicted Lost</div><div class="hd">Predicted Won</div>
       <div class="hd" style="text-align:right">Actual Lost</div>
       <div class="cell correct">${s.tn}</div><div class="cell wrong">${s.fp}</div>
@@ -328,17 +453,16 @@
     const total = s.tn + s.fp + s.fn + s.tp;
     const acc = (s.tn + s.tp) / total;
     document.getElementById("bwl-cm-note").textContent =
-      `Accuracy ${fmtPct(acc)} at the default 0.5 threshold. With a ~30% base win rate, a lower threshold ` +
-      `trades false positives for catching more true wins — AUC is the threshold-free summary above.`;
+      `Accuracy ${fmtPct(acc)} at the default 0.5 threshold. With a base win rate of about 30%, a lower ` +
+      `threshold trades false positives for catching more true wins. AUC above is the threshold-free summary.`;
   }
 
   function renderShapChart(rows) {
     const data = rows.slice().sort((a, b) => b.mean_abs_shap - a.mean_abs_shap);
     const max = d3.max(data, (d) => d.mean_abs_shap);
-    const root = document.getElementById("bwl-shap-chart");
-    root.innerHTML = data.map((d) => `
+    document.getElementById("bwl-shap-chart").innerHTML = data.map((d) => `
       <div class="bwl-barrow">
-        <div class="bwl-barlabel">${esc(label(d.feature))}</div>
+        <div class="bwl-barlabel"><span class="txt">${esc(label(d.feature))}</span>${infoBtn(d.feature)}</div>
         <div class="bwl-bartrack"><div class="bwl-barfill" style="width:${(d.mean_abs_shap / max * 100).toFixed(1)}%"></div></div>
         <div class="bwl-barval">${d3.format(".3f")(d.mean_abs_shap)}</div>
       </div>
@@ -350,10 +474,10 @@
     document.getElementById("bwl-hyp-table").innerHTML = sorted.map((d) => {
       const shift = d.delta;
       const pillClass = shift === 0 ? "neutral" : (Math.abs(shift) <= 2 ? "neutral" : (shift > 0 ? "bad" : "ok"));
-      const arrow = shift === 0 ? "—" : (shift > 0 ? `↓ ${shift}` : `↑ ${-shift}`);
+      const arrow = shift === 0 ? "No change" : (shift > 0 ? `Down ${shift}` : `Up ${-shift}`);
       return `
         <tr>
-          <td>${esc(label(d.feature))}</td>
+          <td class="bwl-feat-cell">${esc(label(d.feature))}${infoBtn(d.feature)}</td>
           <td class="bwl-num">#${d.bu_hypothesis_rank}</td>
           <td class="bwl-num">#${d.shap_rank}</td>
           <td class="bwl-num"><span class="bwl-pill ${pillClass}">${arrow}</span></td>
@@ -361,27 +485,66 @@
     }).join("");
   }
 
+  const FEATURE_ORDER = [
+    "relationship_history", "deal_origin_inbound", "pre_rfp_engagement", "incumbency",
+    "effort_person_months", "price_position_pct", "requirement_coverage", "portfolio_similarity",
+    "geo_timezone_fit", "ip_security_credentials", "competing_bidders",
+  ];
+  function formatFeatureValue(feature, value) {
+    if (value === null || value === undefined) return "Unknown";
+    switch (feature) {
+      case "relationship_history": return RELATIONSHIP_LABELS[value];
+      case "deal_origin_inbound": return value ? "Client reached out first" : "Virtuos approached the client";
+      case "pre_rfp_engagement": return value ? "Yes" : "No";
+      case "incumbency": return CATEGORY_LABELS.incumbency[value] || value;
+      case "effort_person_months": return Math.round(value) + " person-months";
+      case "price_position_pct": return (value > 0 ? "+" : "") + value.toFixed(1) + "% vs. market";
+      case "requirement_coverage": return d3.format(".0%")(value);
+      case "portfolio_similarity": return d3.format(".0%")(value);
+      case "geo_timezone_fit": return d3.format(".0%")(value) + " overlap";
+      case "ip_security_credentials": return value ? "Yes" : "No";
+      case "competing_bidders": return Math.round(value) + " bidders";
+      default: return String(value);
+    }
+  }
+
   function renderExamples(rows) {
-    document.getElementById("bwl-examples").innerHTML = rows.map((ex) => {
+    const root = document.getElementById("bwl-examples");
+    root.innerHTML = rows.map((ex, i) => {
       const won = ex.actual_outcome === "Won";
-      const pos = [1, 2, 3].map((i) => ({ feature: ex[`pos${i}_feature`], contribution: ex[`pos${i}_value`] }))
+      const pos = [1, 2, 3].map((n) => ({ feature: ex[`pos${n}_feature`], contribution: ex[`pos${n}_value`] }))
         .filter((f) => f.feature != null && f.contribution > 0);
-      const neg = [1, 2, 3].map((i) => ({ feature: ex[`neg${i}_feature`], contribution: ex[`neg${i}_value`] }))
+      const neg = [1, 2, 3].map((n) => ({ feature: ex[`neg${n}_feature`], contribution: ex[`neg${n}_value`] }))
         .filter((f) => f.feature != null && f.contribution < 0);
+      const detailRows = FEATURE_ORDER.map((f) => {
+        const v = ex[`feat_${f}`];
+        return `<div class="bwl-details-row"><span class="dn">${esc(label(f))}${infoBtn(f)}</span><span class="dv">${esc(formatFeatureValue(f, v === undefined ? null : v))}</span></div>`;
+      }).join("");
       return `
         <div class="bwl-card">
           <div class="bwl-ex-head">
             <div>
-              <div>${esc(label(ex.client_segment))}</div>
-              <div class="bwl-ex-seg">${esc(label(ex.project_type))} · actually
+              <div>${esc(CATEGORY_LABELS.client_segment[ex.client_segment] || ex.client_segment)}</div>
+              <div class="bwl-ex-seg">${esc(CATEGORY_LABELS.project_type[ex.project_type] || ex.project_type)} &middot; actually
                 <span class="bwl-pill ${won ? "ok" : "bad"}">${ex.actual_outcome}</span></div>
             </div>
             <div class="bwl-ex-prob">${fmtPct(ex.win_probability)}</div>
           </div>
-          ${pos.map((f) => `<div class="bwl-factor"><span class="fn">↑ ${esc(label(f.feature))}</span><span class="fv pos">+${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
-          ${neg.map((f) => `<div class="bwl-factor"><span class="fn">↓ ${esc(label(f.feature))}</span><span class="fv neg">${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+          ${pos.map((f) => `<div class="bwl-factor"><span class="fn">Up: ${esc(label(f.feature))}</span><span class="fv pos">+${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+          ${neg.map((f) => `<div class="bwl-factor"><span class="fn">Down: ${esc(label(f.feature))}</span><span class="fv neg">${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+          <button class="bwl-details-toggle" type="button" data-idx="${i}">Show bid details</button>
+          <div class="bwl-details-grid" id="bwl-ex-details-${i}" hidden>${detailRows}</div>
         </div>`;
     }).join("");
+
+    root.addEventListener("click", (e) => {
+      const btn = e.target.closest(".bwl-details-toggle");
+      if (!btn) return;
+      const panel = document.getElementById(`bwl-ex-details-${btn.dataset.idx}`);
+      const willShow = panel.hidden;
+      panel.hidden = !willShow;
+      btn.textContent = willShow ? "Hide bid details" : "Show bid details";
+    });
   }
 
   // ---- Interactive scorer ----
@@ -392,16 +555,16 @@
 
   function buildScorerForm() {
     const numDefs = {
-      relationship_history: { min: 0, max: 3, step: 1, fmt: (v) => ["New", "Prior (poor)", "Prior (neutral)", "Prior (good)"][v] },
-      deal_origin_inbound: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Inbound" : "Outbound") },
-      pre_rfp_engagement: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Engaged pre-RFP" : "No pre-RFP contact") },
-      effort_person_months: { min: 10, max: 400, step: 5, fmt: (v) => v + " pm" },
-      price_position_pct: { min: -30, max: 30, step: 1, fmt: (v) => (v > 0 ? "+" : "") + v + "%" },
+      relationship_history: { min: 0, max: 3, step: 1, fmt: (v) => RELATIONSHIP_LABELS[v] },
+      deal_origin_inbound: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Client reached out first" : "Virtuos approached the client") },
+      pre_rfp_engagement: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Yes, talked before the bid" : "No prior contact") },
+      effort_person_months: { min: 10, max: 400, step: 5, fmt: (v) => v + " person-months" },
+      price_position_pct: { min: -30, max: 30, step: 1, fmt: (v) => (v > 0 ? "+" : "") + v + "% vs. market" },
       requirement_coverage: { min: 0.5, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
       portfolio_similarity: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
-      geo_timezone_fit: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
-      ip_security_credentials: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Has credentials" : "No credentials") },
-      competing_bidders: { min: 1, max: 10, step: 1, fmt: (v) => v },
+      geo_timezone_fit: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) + " overlap" },
+      ip_security_credentials: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Yes" : "No") },
+      competing_bidders: { min: 1, max: 10, step: 1, fmt: (v) => v + " bidders" },
     };
 
     numRows.forEach((r) => { scorerState[r.feature] = r.default; });
@@ -416,16 +579,16 @@
       const f = r.feature;
       const d = numDefs[f] || { min: 0, max: 1, step: 0.01, fmt: (v) => v };
       return `<div class="bwl-field">
-        <label for="f-${f}">${esc(label(f))} <span class="val" id="v-${f}">${esc(d.fmt(scorerState[f]))}</span></label>
+        <label for="f-${f}"><span class="lbl">${esc(label(f))}${infoBtn(f)}</span> <span class="val" id="v-${f}">${esc(d.fmt(scorerState[f]))}</span></label>
         <input type="range" id="f-${f}" min="${d.min}" max="${d.max}" step="${d.step}" value="${scorerState[f]}">
       </div>`;
     }).join("");
     const catHtml = catFeatures.map((f) => {
       const opts = catRows.filter((r) => r.feature === f).map((r) =>
-        `<option value="${esc(r.category)}" ${r.category === scorerState[f] ? "selected" : ""}>${esc(label(r.category))}</option>`
+        `<option value="${esc(r.category)}" ${r.category === scorerState[f] ? "selected" : ""}>${esc((CATEGORY_LABELS[f] && CATEGORY_LABELS[f][r.category]) || r.category)}</option>`
       ).join("");
       return `<div class="bwl-field">
-        <label for="f-${f}">${esc(label(f))}</label>
+        <label for="f-${f}"><span class="lbl">${esc(label(f))}${infoBtn(f)}</span></label>
         <select id="f-${f}">${opts}</select>
       </div>`;
     }).join("");
@@ -480,7 +643,7 @@
     contribs.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
     const top = contribs.slice(0, 5);
     document.getElementById("bwl-scorer-factors").innerHTML = top.map((c) => {
-      const name = c.catValue ? `${label(c.feature)}: ${label(c.catValue)}` : label(c.feature);
+      const name = c.catValue ? `${label(c.feature)}: ${(CATEGORY_LABELS[c.feature] && CATEGORY_LABELS[c.feature][c.catValue]) || c.catValue}` : label(c.feature);
       const cls = c.contribution >= 0 ? "pos" : "neg";
       const sign = c.contribution >= 0 ? "+" : "";
       return `<div class="bwl-factor"><span class="fn">${esc(name)}</span><span class="fv ${cls}">${sign}${d3.format(".2f")(c.contribution)}</span></div>`;

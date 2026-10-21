@@ -58,6 +58,8 @@ for i, ex in enumerate(r["example_bids"]):
     for j, f in enumerate(ex["top_negative_factors"][:3]):
         row[f"neg{j+1}_feature"] = f["feature"]
         row[f"neg{j+1}_value"] = f["contribution"]
+    for feat, val in ex.get("features", {}).items():
+        row[f"feat_{feat}"] = val
     ex_rows.append(row)
 dump("examples", ex_rows)
 

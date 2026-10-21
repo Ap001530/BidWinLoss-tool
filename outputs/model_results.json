@@ -495,7 +495,20 @@
           "feature": "competing_bidders",
           "contribution": 0.006
         }
-      ]
+      ],
+      "features": {
+        "relationship_history": 0,
+        "deal_origin_inbound": 1,
+        "pre_rfp_engagement": 1,
+        "incumbency": "Displacement",
+        "effort_person_months": 46.2,
+        "price_position_pct": -13.1,
+        "requirement_coverage": 0.78,
+        "portfolio_similarity": 0.69,
+        "geo_timezone_fit": 0.79,
+        "ip_security_credentials": 1,
+        "competing_bidders": 3
+      }
     },
     {
       "client_segment": "AAA_publisher",
@@ -529,7 +542,20 @@
           "feature": "competing_bidders",
           "contribution": -0.056
         }
-      ]
+      ],
+      "features": {
+        "relationship_history": 3,
+        "deal_origin_inbound": 0,
+        "pre_rfp_engagement": null,
+        "incumbency": "Displacement",
+        "effort_person_months": 24.7,
+        "price_position_pct": -1.2,
+        "requirement_coverage": 0.72,
+        "portfolio_similarity": 0.61,
+        "geo_timezone_fit": 0.71,
+        "ip_security_credentials": 1,
+        "competing_bidders": 6
+      }
     },
     {
       "client_segment": "AAA_publisher",
@@ -563,7 +589,20 @@
           "feature": "competing_bidders",
           "contribution": -0.054
         }
-      ]
+      ],
+      "features": {
+        "relationship_history": 3,
+        "deal_origin_inbound": 1,
+        "pre_rfp_engagement": 1,
+        "incumbency": "Displacement",
+        "effort_person_months": 48.0,
+        "price_position_pct": 1.6,
+        "requirement_coverage": 0.99,
+        "portfolio_similarity": 0.47,
+        "geo_timezone_fit": 0.27,
+        "ip_security_credentials": 1,
+        "competing_bidders": 7
+      }
     },
     {
       "client_segment": "Indie_studio",
@@ -597,7 +636,20 @@
           "feature": "pre_rfp_engagement",
           "contribution": -0.25
         }
-      ]
+      ],
+      "features": {
+        "relationship_history": 0,
+        "deal_origin_inbound": 0,
+        "pre_rfp_engagement": 0,
+        "incumbency": "Greenfield",
+        "effort_person_months": 96.5,
+        "price_position_pct": -7.3,
+        "requirement_coverage": 0.68,
+        "portfolio_similarity": 0.27,
+        "geo_timezone_fit": 0.63,
+        "ip_security_credentials": 0,
+        "competing_bidders": 5
+      }
     },
     {
       "client_segment": "Indie_studio",
@@ -631,7 +683,20 @@
           "feature": "project_type",
           "contribution": -0.106
         }
-      ]
+      ],
+      "features": {
+        "relationship_history": 0,
+        "deal_origin_inbound": 0,
+        "pre_rfp_engagement": 1,
+        "incumbency": "Greenfield",
+        "effort_person_months": 38.3,
+        "price_position_pct": -2.7,
+        "requirement_coverage": null,
+        "portfolio_similarity": 0.53,
+        "geo_timezone_fit": 0.76,
+        "ip_security_credentials": 0,
+        "competing_bidders": 7
+      }
     },
     {
       "client_segment": "AAA_publisher",
@@ -665,7 +730,20 @@
           "feature": "effort_person_months",
           "contribution": -0.096
         }
-      ]
+      ],
+      "features": {
+        "relationship_history": 3,
+        "deal_origin_inbound": 0,
+        "pre_rfp_engagement": 0,
+        "incumbency": "Greenfield",
+        "effort_person_months": 61.8,
+        "price_position_pct": 2.2,
+        "requirement_coverage": 0.79,
+        "portfolio_similarity": 0.44,
+        "geo_timezone_fit": 0.82,
+        "ip_security_credentials": 0,
+        "competing_bidders": 3
+      }
     },
     {
       "client_segment": "Midsize_publisher",
@@ -699,7 +777,20 @@
           "feature": "geo_timezone_fit",
           "contribution": -0.091
         }
-      ]
+      ],
+      "features": {
+        "relationship_history": 3,
+        "deal_origin_inbound": 0,
+        "pre_rfp_engagement": 0,
+        "incumbency": "Greenfield",
+        "effort_person_months": 71.7,
+        "price_position_pct": 2.5,
+        "requirement_coverage": 0.78,
+        "portfolio_similarity": 0.59,
+        "geo_timezone_fit": 0.55,
+        "ip_security_credentials": 0,
+        "competing_bidders": 5
+      }
     },
     {
       "client_segment": "AAA_publisher",
@@ -733,7 +824,20 @@
           "feature": "geo_timezone_fit",
           "contribution": -0.109
         }
-      ]
+      ],
+      "features": {
+        "relationship_history": 0,
+        "deal_origin_inbound": 0,
+        "pre_rfp_engagement": 0,
+        "incumbency": "Greenfield",
+        "effort_person_months": 32.3,
+        "price_position_pct": 4.1,
+        "requirement_coverage": 0.78,
+        "portfolio_similarity": 0.56,
+        "geo_timezone_fit": 0.42,
+        "ip_security_credentials": 1,
+        "competing_bidders": 4
+      }
     }
   ],
   "scorer_base_value": -0.934327575680224,
