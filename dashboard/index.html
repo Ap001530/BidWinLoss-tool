@@ -1,0 +1,499 @@
+<style>
+  #dash-root {
+    --dash-gutter: clamp(16px, 4vw, 40px);
+    --accent: #c9823a;
+    --accent-soft: color-mix(in srgb, var(--accent) 16%, var(--color-panel));
+    --rule: var(--color-border-line);
+    font-family: var(--font-anthropic-sans);
+  }
+  .bwl-banner {
+    background: color-mix(in srgb, var(--color-warn) 14%, var(--color-panel));
+    border: 1px solid color-mix(in srgb, var(--color-warn) 45%, var(--color-border-line));
+    border-radius: var(--cds-radius);
+    padding: var(--cds-pad-sm) var(--cds-pad-lg);
+    font-size: var(--cds-font-size-caption);
+    color: var(--color-fg-muted);
+    margin-bottom: var(--cds-gap-lg);
+    line-height: 1.5;
+  }
+  .bwl-banner b { color: var(--color-fg); }
+  .bwl-header { margin-bottom: var(--cds-gap-lg); }
+  .bwl-title {
+    font-family: var(--font-anthropic-serif);
+    font-weight: 400;
+    font-size: var(--cds-font-size-title);
+    margin: 0 0 4px 0;
+  }
+  .bwl-sub { color: var(--color-fg-muted); font-size: var(--cds-font-size-body); margin: 0; }
+  .bwl-section { margin-bottom: var(--cds-gap-lg); }
+  .bwl-section > h2 {
+    font-size: var(--cds-font-size-heading);
+    font-weight: var(--cds-font-weight-medium);
+    margin: 0 0 var(--cds-gap-sm) 0;
+  }
+  .bwl-section > p.bwl-note {
+    color: var(--color-fg-muted);
+    font-size: var(--cds-font-size-caption);
+    margin: 0 0 var(--cds-gap-md) 0;
+    max-width: 62ch;
+    line-height: 1.5;
+  }
+  .bwl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: var(--cds-gap-md);
+  }
+  .bwl-card {
+    background: var(--color-panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--cds-radius);
+    padding: var(--cds-pad-lg);
+    min-width: 0;
+  }
+  .bwl-card h3 {
+    font-size: var(--cds-font-size-caption);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--color-fg-muted);
+    font-weight: var(--cds-font-weight-medium);
+    margin: 0 0 var(--cds-pad-xs) 0;
+  }
+  .bwl-stat {
+    font-family: var(--font-anthropic-serif);
+    font-weight: 400;
+    font-size: var(--cds-font-size-title);
+    font-variant-numeric: tabular-nums;
+  }
+  .bwl-stat-sub { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-top: 2px; }
+  .bwl-two-col {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: var(--cds-gap-md);
+    align-items: start;
+  }
+  @media (max-width: 760px) { .bwl-two-col { grid-template-columns: 1fr; } }
+  .bwl-barrow { display: flex; align-items: center; gap: var(--cds-gap-sm); margin-bottom: 7px; }
+  .bwl-barlabel {
+    width: 10.5rem; flex: 0 0 auto; font-size: var(--cds-font-size-caption);
+    text-align: right; color: var(--color-fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .bwl-bartrack { flex: 1; min-width: 0; height: 16px; background: var(--color-bg); border-radius: 4px; overflow: hidden; }
+  .bwl-barfill { height: 100%; border-radius: 4px; background: var(--accent); }
+  .bwl-barval { width: 3.2rem; flex: 0 0 auto; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; color: var(--color-fg-muted); }
+  table.bwl-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); }
+  table.bwl-table th, table.bwl-table td {
+    text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule);
+    font-variant-numeric: tabular-nums;
+  }
+  table.bwl-table th { color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
+  table.bwl-table td.bwl-num, table.bwl-table th.bwl-num { text-align: right; }
+  .bwl-pill {
+    display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px;
+    font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium);
+  }
+  .bwl-pill.ok { background: color-mix(in srgb, var(--color-ok) 16%, transparent); color: var(--color-ok); }
+  .bwl-pill.bad { background: color-mix(in srgb, var(--color-bad) 16%, transparent); color: var(--color-bad); }
+  .bwl-pill.neutral { background: var(--color-bg); color: var(--color-fg-muted); }
+  .bwl-cm { display: grid; grid-template-columns: auto 1fr 1fr; gap: 2px; font-size: var(--cds-font-size-caption); max-width: 20rem; }
+  .bwl-cm .hd { color: var(--color-fg-muted); padding: 4px 8px; text-align: center; }
+  .bwl-cm .cell { padding: 10px 8px; text-align: center; border-radius: 4px; font-variant-numeric: tabular-nums; font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); }
+  .bwl-cm .cell.correct { background: color-mix(in srgb, var(--color-ok) 14%, var(--color-bg)); color: var(--color-ok); }
+  .bwl-cm .cell.wrong { background: color-mix(in srgb, var(--color-bad) 10%, var(--color-bg)); color: var(--color-bad); }
+  .bwl-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-md); }
+  .bwl-ex-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+  .bwl-ex-seg { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .bwl-ex-prob { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-heading); font-variant-numeric: tabular-nums; }
+  .bwl-factor { display: flex; justify-content: space-between; font-size: var(--cds-font-size-caption); padding: 2px 0; gap: 8px; }
+  .bwl-factor .fn { color: var(--color-fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bwl-factor .fv { font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+  .bwl-factor .fv.pos { color: var(--color-ok); }
+  .bwl-factor .fv.neg { color: var(--color-bad); }
+  .bwl-scorer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--cds-gap-md); }
+  @media (max-width: 760px) { .bwl-scorer-grid { grid-template-columns: 1fr; } }
+  .bwl-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: var(--cds-gap-sm); }
+  .bwl-field label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; justify-content: space-between; }
+  .bwl-field label span.val { color: var(--color-fg); font-variant-numeric: tabular-nums; }
+  .bwl-field input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .bwl-field select {
+    background: var(--color-bg); color: var(--color-fg); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 7px 8px; font-size: var(--cds-font-size-body); font-family: var(--font-anthropic-sans);
+  }
+  .bwl-scorer-result { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: var(--cds-pad-lg) 0; }
+  .bwl-scorer-prob { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 3.4rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .bwl-scorer-label { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .bwl-gauge-track { width: 100%; max-width: 20rem; height: 10px; background: var(--color-bg); border-radius: 999px; overflow: hidden; margin: 10px 0; }
+  .bwl-gauge-fill { height: 100%; border-radius: 999px; transition: width .25s ease; }
+  .bwl-factorlist { width: 100%; max-width: 22rem; margin-top: var(--cds-pad-sm); }
+  .bwl-disclaimer { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-top: var(--cds-pad-sm); line-height: 1.5; }
+  .bwl-foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); border-top: 1px solid var(--rule); padding-top: var(--cds-pad-md); line-height: 1.6; }
+  .bwl-foot code { font-family: var(--font-anthropic-sans); background: var(--color-bg); padding: 1px 5px; border-radius: 4px; }
+  [data-dash-source-state="loading"] { opacity: .5; }
+</style>
+
+<div data-source="results">
+  <div class="bwl-banner">
+    <b>Synthetic data.</b> Every number below comes from a pipeline run on synthetically generated bids
+    (<code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code>), where feature→outcome
+    relationships were encoded from the Engineering BU's documented hypotheses, not observed from real bids.
+    This validates that the pipeline recovers known signal correctly — it is not a finding about what wins
+    real Virtuos bids. See <code>data/methodology_synthetic_data.md</code>.
+  </div>
+
+  <div class="bwl-header">
+    <h1 class="bwl-title">Bid Competitiveness Pipeline</h1>
+    <p class="bwl-sub" id="bwl-takeaway">Loading pipeline results…</p>
+  </div>
+
+  <div class="bwl-section">
+    <h2>Model performance</h2>
+    <p class="bwl-note">Gradient-boosted classifier, 5-fold cross-validated, on <span id="bwl-nrows">–</span>
+      resolved bids (<span id="bwl-winrate">–</span> win rate).</p>
+    <div class="bwl-grid">
+      <div class="bwl-card">
+        <h3>5-fold CV AUC</h3>
+        <div class="bwl-stat dash-skeleton" id="bwl-cvauc">–</div>
+        <div class="bwl-stat-sub" id="bwl-cvauc-sub">&nbsp;</div>
+      </div>
+      <div class="bwl-card">
+        <h3>Held-out test AUC</h3>
+        <div class="bwl-stat dash-skeleton" id="bwl-testauc">–</div>
+        <div class="bwl-stat-sub">Single 75/25 split, 125 bids</div>
+      </div>
+      <div class="bwl-card">
+        <h3>Brier score</h3>
+        <div class="bwl-stat dash-skeleton" id="bwl-brier">–</div>
+        <div class="bwl-stat-sub">Lower is better-calibrated</div>
+      </div>
+      <div class="bwl-card">
+        <h3>SHAP ↔ BU hypothesis rank</h3>
+        <div class="bwl-stat dash-skeleton" id="bwl-spearman">–</div>
+        <div class="bwl-stat-sub">Spearman correlation</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bwl-section">
+    <div class="bwl-two-col">
+      <div class="bwl-card">
+        <h3>ROC curve (held-out test set)</h3>
+        <svg id="bwl-roc" width="100%" viewBox="0 0 400 260" style="overflow:visible"></svg>
+      </div>
+      <div class="bwl-card">
+        <h3>Confusion matrix (held-out test set, threshold 0.5)</h3>
+        <div class="bwl-cm" id="bwl-cm"></div>
+        <p class="bwl-disclaimer" id="bwl-cm-note"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bwl-section">
+    <h2>What SHAP says actually drives the model</h2>
+    <p class="bwl-note">Mean absolute SHAP value per feature across all 500 bids — how much each feature
+      moves the model's predicted win probability, on average, up or down.</p>
+    <div class="bwl-card" id="bwl-shap-chart"></div>
+  </div>
+
+  <div class="bwl-section">
+    <h2>SHAP vs. the BU's documented hypotheses</h2>
+    <p class="bwl-note">The BU's feature hypotheses document ranked features by expected importance before
+      any modelling. This compares that rank to where SHAP actually places each feature after training.
+      Because the synthetic data's weights were themselves set from these hypotheses, agreement is expected
+      and is not independent confirmation — the interesting result is where the two ranks diverge, which
+      reflects noise, interaction effects, or class imbalance the model picked up that a flat reading of the
+      hypotheses would not predict.</p>
+    <div class="bwl-card">
+      <table class="bwl-table">
+        <thead>
+          <tr><th>Feature</th><th class="bwl-num">BU hypothesis rank</th><th class="bwl-num">SHAP rank</th><th class="bwl-num">Shift</th></tr>
+        </thead>
+        <tbody id="bwl-hyp-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bwl-section">
+    <h2>Example bids</h2>
+    <p class="bwl-note">Eight bids sampled from the dataset with the model's predicted win probability and
+      the top factors SHAP attributes it to.</p>
+    <div class="bwl-examples" id="bwl-examples"></div>
+  </div>
+</div>
+
+<div class="bwl-section" data-source="results">
+  <h2>Score a hypothetical bid</h2>
+  <p class="bwl-note">Interactive estimate from a logistic-regression surrogate fit on the same synthetic
+    data (full-data AUC <span id="bwl-scorer-auc">–</span>, 5-fold CV AUC <span id="bwl-scorer-cvauc">–</span>).
+    A linear model is used here instead of the gradient-boosted model above because its decision function
+    can be evaluated exactly in the browser — every contribution shown is an exact coefficient × value term,
+    not an approximation.</p>
+  <div class="bwl-card">
+    <div class="bwl-scorer-grid">
+      <div id="bwl-scorer-form"></div>
+      <div class="bwl-scorer-result">
+        <div class="bwl-gauge-track"><div class="bwl-gauge-fill" id="bwl-gauge"></div></div>
+        <div class="bwl-scorer-prob" id="bwl-scorer-prob">–</div>
+        <div class="bwl-scorer-label">estimated win probability</div>
+        <div class="bwl-factorlist" id="bwl-scorer-factors"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bwl-foot">
+  Pipeline: <code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code> →
+  <code>outputs/model_results.json</code> (this dashboard's only data source). Full methodology and
+  limitations in <code>data/methodology_synthetic_data.md</code>.
+</div>
+
+<script>
+(function () {
+  const fmtPct = (x) => d3.format(".1%")(x);
+  const fmtAuc = (x) => d3.format(".3f")(x);
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  const FEATURE_LABELS = {
+    relationship_history: "Relationship history",
+    deal_origin_inbound: "Deal origin (inbound)",
+    pre_rfp_engagement: "Pre-RFP engagement",
+    incumbency: "Incumbency",
+    effort_person_months: "Effort (person-months)",
+    price_position_pct: "Price position (%)",
+    requirement_coverage: "Requirement coverage",
+    portfolio_similarity: "Portfolio similarity",
+    geo_timezone_fit: "Geo / timezone fit",
+    ip_security_credentials: "IP security credentials",
+    competing_bidders: "Competing bidders",
+    client_segment: "Client segment",
+    project_type: "Project type",
+  };
+  const label = (f) => FEATURE_LABELS[f] || String(f).replace(/_/g, " ");
+
+  function renderPerformance(r) {
+    document.getElementById("bwl-nrows").textContent = d3.format(",")(r.meta.n_rows);
+    document.getElementById("bwl-winrate").textContent = fmtPct(r.meta.win_rate);
+    document.getElementById("bwl-cvauc").textContent = fmtAuc(r.performance.cv_auc_mean);
+    document.getElementById("bwl-cvauc-sub").textContent = "± " + fmtAuc(r.performance.cv_auc_std) + " across 5 folds";
+    document.getElementById("bwl-testauc").textContent = fmtAuc(r.performance.test_auc);
+    document.getElementById("bwl-brier").textContent = d3.format(".4f")(r.performance.brier_score);
+    document.getElementById("bwl-spearman").textContent = d3.format(".2f")(r.spearman_rank_correlation);
+
+    const take = document.getElementById("bwl-takeaway");
+    take.textContent = `Recovers known signal at AUC ${fmtAuc(r.performance.cv_auc_mean)} (5-fold CV); ` +
+      `SHAP ranking agrees with the BU's stated hypotheses at ρ = ${d3.format(".2f")(r.spearman_rank_correlation)}.`;
+
+    document.querySelectorAll(".dash-skeleton").forEach((el) => el.classList.remove("dash-skeleton"));
+  }
+
+  function renderRoc(r) {
+    const svg = d3.select("#bwl-roc");
+    svg.selectAll("*").remove();
+    const W = 400, H = 260, M = { t: 10, r: 14, b: 30, l: 34 };
+    const x = d3.scaleLinear([0, 1], [M.l, W - M.r]);
+    const y = d3.scaleLinear([0, 1], [H - M.b, M.t]);
+
+    svg.append("line").attr("x1", x(0)).attr("y1", y(0)).attr("x2", x(1)).attr("y2", y(1))
+      .attr("stroke", "var(--cds-chart-reference)").attr("stroke-dasharray", "3,3");
+
+    [0, .5, 1].forEach((t) => {
+      svg.append("line").attr("x1", x(t)).attr("x2", x(t)).attr("y1", y(0)).attr("y2", y(1))
+        .attr("stroke", "var(--cds-chart-grid)");
+      svg.append("line").attr("x1", x(0)).attr("x2", x(1)).attr("y1", y(t)).attr("y2", y(t))
+        .attr("stroke", "var(--cds-chart-grid)");
+      svg.append("text").attr("x", x(t)).attr("y", H - M.b + 16).attr("text-anchor", "middle")
+        .attr("fill", "var(--color-fg-muted)").attr("font-size", 10).text(t);
+      svg.append("text").attr("x", M.l - 8).attr("y", y(t) + 3).attr("text-anchor", "end")
+        .attr("fill", "var(--color-fg-muted)").attr("font-size", 10).text(t);
+    });
+    svg.append("text").attr("x", (M.l + W - M.r) / 2).attr("y", H - 2).attr("text-anchor", "middle")
+      .attr("fill", "var(--color-fg-muted)").attr("font-size", 10).text("False positive rate");
+    svg.append("text").attr("x", 10).attr("y", H / 2).attr("text-anchor", "middle")
+      .attr("fill", "var(--color-fg-muted)").attr("font-size", 10)
+      .attr("transform", `rotate(-90, 10, ${H / 2})`).text("True positive rate");
+
+    const line = d3.line().x((d) => x(d.fpr)).y((d) => y(d.tpr));
+    svg.append("path").datum(r.performance.roc_curve).attr("d", line).attr("fill", "none")
+      .attr("stroke", "var(--accent)").attr("stroke-width", 2.5).attr("stroke-linejoin", "round");
+
+    svg.append("text").attr("x", W - M.r).attr("y", M.t + 12).attr("text-anchor", "end")
+      .attr("fill", "var(--color-fg-muted)").attr("font-size", 11)
+      .text("AUC = " + fmtAuc(r.performance.test_auc));
+  }
+
+  function renderConfusion(r) {
+    const cm = r.performance.confusion_matrix;
+    const root = document.getElementById("bwl-cm");
+    root.innerHTML = `
+      <div></div><div class="hd">Predicted Lost</div><div class="hd">Predicted Won</div>
+      <div class="hd" style="text-align:right">Actual Lost</div>
+      <div class="cell correct">${cm.tn}</div><div class="cell wrong">${cm.fp}</div>
+      <div class="hd" style="text-align:right">Actual Won</div>
+      <div class="cell wrong">${cm.fn}</div><div class="cell correct">${cm.tp}</div>
+    `;
+    const total = cm.tn + cm.fp + cm.fn + cm.tp;
+    const acc = (cm.tn + cm.tp) / total;
+    document.getElementById("bwl-cm-note").textContent =
+      `Accuracy ${fmtPct(acc)} at the default 0.5 threshold. With a ~30% base win rate, a lower threshold ` +
+      `trades false positives for catching more true wins — AUC is the threshold-free summary above.`;
+  }
+
+  function renderShapChart(r) {
+    const data = r.shap_global_importance;
+    const max = d3.max(data, (d) => d.mean_abs_shap);
+    const root = document.getElementById("bwl-shap-chart");
+    root.innerHTML = data.map((d) => `
+      <div class="bwl-barrow">
+        <div class="bwl-barlabel">${esc(label(d.feature))}</div>
+        <div class="bwl-bartrack"><div class="bwl-barfill" style="width:${(d.mean_abs_shap / max * 100).toFixed(1)}%"></div></div>
+        <div class="bwl-barval">${d3.format(".3f")(d.mean_abs_shap)}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderHypothesisTable(r) {
+    const rows = r.hypothesis_comparison.slice().sort((a, b) => a.bu_hypothesis_rank - b.bu_hypothesis_rank);
+    document.getElementById("bwl-hyp-table").innerHTML = rows.map((d) => {
+      const shift = d.delta;
+      const pillClass = shift === 0 ? "neutral" : (Math.abs(shift) <= 2 ? "neutral" : (shift > 0 ? "bad" : "ok"));
+      const arrow = shift === 0 ? "—" : (shift > 0 ? `↓ ${shift}` : `↑ ${-shift}`);
+      return `
+        <tr>
+          <td>${esc(label(d.feature))}</td>
+          <td class="bwl-num">#${d.bu_hypothesis_rank}</td>
+          <td class="bwl-num">#${d.shap_rank}</td>
+          <td class="bwl-num"><span class="bwl-pill ${pillClass}">${arrow}</span></td>
+        </tr>`;
+    }).join("");
+  }
+
+  function renderExamples(r) {
+    document.getElementById("bwl-examples").innerHTML = r.example_bids.map((ex) => {
+      const won = ex.actual_outcome === "Won";
+      const pos = ex.top_positive_factors.filter((f) => f.contribution > 0);
+      const neg = ex.top_negative_factors.filter((f) => f.contribution < 0);
+      return `
+        <div class="bwl-card">
+          <div class="bwl-ex-head">
+            <div>
+              <div>${esc(label(ex.client_segment))}</div>
+              <div class="bwl-ex-seg">${esc(label(ex.project_type))} · actually
+                <span class="bwl-pill ${won ? "ok" : "bad"}">${ex.actual_outcome}</span></div>
+            </div>
+            <div class="bwl-ex-prob">${fmtPct(ex.win_probability)}</div>
+          </div>
+          ${pos.map((f) => `<div class="bwl-factor"><span class="fn">↑ ${esc(label(f.feature))}</span><span class="fv pos">+${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+          ${neg.map((f) => `<div class="bwl-factor"><span class="fn">↓ ${esc(label(f.feature))}</span><span class="fv neg">${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+        </div>`;
+    }).join("");
+  }
+
+  // ---- Interactive scorer ----
+  let scorerModel = null;
+  const scorerState = {};
+
+  function defaultCatFor(cat) {
+    return scorerModel.cat_mode_for_defaults[cat];
+  }
+
+  function buildScorerForm(sm) {
+    scorerModel = sm;
+    const numDefs = {
+      relationship_history: { min: 0, max: 3, step: 1, fmt: (v) => ["New", "Prior (poor)", "Prior (neutral)", "Prior (good)"][v] },
+      deal_origin_inbound: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Inbound" : "Outbound") },
+      pre_rfp_engagement: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Engaged pre-RFP" : "No pre-RFP contact") },
+      effort_person_months: { min: 10, max: 400, step: 5, fmt: (v) => v + " pm" },
+      price_position_pct: { min: -30, max: 30, step: 1, fmt: (v) => (v > 0 ? "+" : "") + v + "%" },
+      requirement_coverage: { min: 0.5, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
+      portfolio_similarity: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
+      geo_timezone_fit: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
+      ip_security_credentials: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Has credentials" : "No credentials") },
+      competing_bidders: { min: 1, max: 10, step: 1, fmt: (v) => v },
+    };
+
+    sm.num_features.forEach((f, i) => { scorerState[f] = sm.num_medians_for_defaults[i]; });
+    sm.cat_features.forEach((f) => { scorerState[f] = defaultCatFor(f); });
+
+    const form = document.getElementById("bwl-scorer-form");
+    const numHtml = sm.num_features.map((f) => {
+      const d = numDefs[f];
+      return `<div class="bwl-field">
+        <label for="f-${f}">${esc(label(f))} <span class="val" id="v-${f}">${esc(d.fmt(scorerState[f]))}</span></label>
+        <input type="range" id="f-${f}" min="${d.min}" max="${d.max}" step="${d.step}" value="${scorerState[f]}">
+      </div>`;
+    }).join("");
+    const catHtml = sm.cat_features.map((f) => {
+      const opts = sm.cat_categories[f].map((c) => `<option value="${esc(c)}" ${c === scorerState[f] ? "selected" : ""}>${esc(label(c))}</option>`).join("");
+      return `<div class="bwl-field">
+        <label for="f-${f}">${esc(label(f))}</label>
+        <select id="f-${f}">${opts}</select>
+      </div>`;
+    }).join("");
+    form.innerHTML = numHtml + catHtml;
+
+    sm.num_features.forEach((f) => {
+      document.getElementById(`f-${f}`).addEventListener("input", (e) => {
+        const v = Number(e.target.value);
+        scorerState[f] = v;
+        document.getElementById(`v-${f}`).textContent = numDefs[f].fmt(v);
+        computeScore();
+      });
+    });
+    sm.cat_features.forEach((f) => {
+      document.getElementById(`f-${f}`).addEventListener("change", (e) => {
+        scorerState[f] = e.target.value;
+        computeScore();
+      });
+    });
+
+    document.getElementById("bwl-scorer-auc").textContent = fmtAuc(sm.auc_on_full_data);
+    document.getElementById("bwl-scorer-cvauc").textContent = fmtAuc(sm.cv_auc_mean);
+
+    computeScore();
+  }
+
+  function computeScore() {
+    const sm = scorerModel;
+    let logit = sm.intercept;
+    const contribs = [];
+    sm.num_features.forEach((f, i) => {
+      const z = (scorerState[f] - sm.num_means[i]) / sm.num_scales[i];
+      const c = sm.num_coefs[i] * z;
+      logit += c;
+      contribs.push({ feature: f, contribution: c });
+    });
+    sm.cat_features.forEach((f) => {
+      const key = `${f}_${scorerState[f]}`;
+      const c = sm.cat_coefs[key] || 0;
+      logit += c;
+      contribs.push({ feature: f, contribution: c, catValue: scorerState[f] });
+    });
+    const prob = 1 / (1 + Math.exp(-logit));
+
+    document.getElementById("bwl-scorer-prob").textContent = fmtPct(prob);
+    const gauge = document.getElementById("bwl-gauge");
+    gauge.style.width = (prob * 100).toFixed(1) + "%";
+    gauge.style.background = prob >= 0.5 ? "var(--color-ok)" : (prob >= 0.3 ? "var(--accent)" : "var(--color-bad)");
+
+    contribs.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
+    const top = contribs.slice(0, 5);
+    document.getElementById("bwl-scorer-factors").innerHTML = top.map((c) => {
+      const name = c.catValue ? `${label(c.feature)}: ${label(c.catValue)}` : label(c.feature);
+      const cls = c.contribution >= 0 ? "pos" : "neg";
+      const sign = c.contribution >= 0 ? "+" : "";
+      return `<div class="bwl-factor"><span class="fn">${esc(name)}</span><span class="fv ${cls}">${sign}${d3.format(".2f")(c.contribution)}</span></div>`;
+    }).join("");
+  }
+
+  dash.onData((status) => {
+    const d = dash.data("results");
+    if (d.status !== "ok") return;
+    const r = d.data;
+    renderPerformance(r);
+    renderRoc(r);
+    renderConfusion(r);
+    renderShapChart(r);
+    renderHypothesisTable(r);
+    renderExamples(r);
+    buildScorerForm(r.scorer_model);
+  });
+})();
+</script>
