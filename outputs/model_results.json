@@ -1,0 +1,850 @@
+{
+  "meta": {
+    "n_rows": 500,
+    "win_rate": 0.306,
+    "model": "GradientBoostingClassifier (scikit-learn)",
+    "n_train": 375,
+    "n_test": 125,
+    "random_state": 42,
+    "feature_order": [
+      "relationship_history",
+      "deal_origin_inbound",
+      "pre_rfp_engagement",
+      "effort_person_months",
+      "price_position_pct",
+      "requirement_coverage",
+      "portfolio_similarity",
+      "geo_timezone_fit",
+      "ip_security_credentials",
+      "competing_bidders",
+      "client_segment",
+      "project_type",
+      "incumbency"
+    ],
+    "cat_features": [
+      "client_segment",
+      "project_type",
+      "incumbency"
+    ],
+    "num_features": [
+      "relationship_history",
+      "deal_origin_inbound",
+      "pre_rfp_engagement",
+      "effort_person_months",
+      "price_position_pct",
+      "requirement_coverage",
+      "portfolio_similarity",
+      "geo_timezone_fit",
+      "ip_security_credentials",
+      "competing_bidders"
+    ]
+  },
+  "performance": {
+    "test_auc": 0.632,
+    "cv_auc_mean": 0.705,
+    "cv_auc_std": 0.052,
+    "cv_auc_folds": [
+      0.748,
+      0.674,
+      0.692,
+      0.632,
+      0.776
+    ],
+    "brier_score": 0.2103,
+    "confusion_matrix": {
+      "tn": 77,
+      "fp": 10,
+      "fn": 28,
+      "tp": 10
+    },
+    "roc_curve": [
+      {
+        "fpr": 0.0,
+        "tpr": 0.0
+      },
+      {
+        "fpr": 0.0,
+        "tpr": 0.0263
+      },
+      {
+        "fpr": 0.046,
+        "tpr": 0.0263
+      },
+      {
+        "fpr": 0.046,
+        "tpr": 0.1053
+      },
+      {
+        "fpr": 0.0575,
+        "tpr": 0.1053
+      },
+      {
+        "fpr": 0.0575,
+        "tpr": 0.1316
+      },
+      {
+        "fpr": 0.069,
+        "tpr": 0.1316
+      },
+      {
+        "fpr": 0.069,
+        "tpr": 0.1842
+      },
+      {
+        "fpr": 0.0805,
+        "tpr": 0.1842
+      },
+      {
+        "fpr": 0.0805,
+        "tpr": 0.2105
+      },
+      {
+        "fpr": 0.092,
+        "tpr": 0.2105
+      },
+      {
+        "fpr": 0.092,
+        "tpr": 0.2368
+      },
+      {
+        "fpr": 0.1149,
+        "tpr": 0.2368
+      },
+      {
+        "fpr": 0.1149,
+        "tpr": 0.2632
+      },
+      {
+        "fpr": 0.1379,
+        "tpr": 0.2632
+      },
+      {
+        "fpr": 0.1379,
+        "tpr": 0.2895
+      },
+      {
+        "fpr": 0.1724,
+        "tpr": 0.2895
+      },
+      {
+        "fpr": 0.1724,
+        "tpr": 0.3158
+      },
+      {
+        "fpr": 0.1839,
+        "tpr": 0.3158
+      },
+      {
+        "fpr": 0.1839,
+        "tpr": 0.3421
+      },
+      {
+        "fpr": 0.2069,
+        "tpr": 0.3421
+      },
+      {
+        "fpr": 0.2069,
+        "tpr": 0.3684
+      },
+      {
+        "fpr": 0.2414,
+        "tpr": 0.3684
+      },
+      {
+        "fpr": 0.2414,
+        "tpr": 0.3947
+      },
+      {
+        "fpr": 0.2874,
+        "tpr": 0.3947
+      },
+      {
+        "fpr": 0.2874,
+        "tpr": 0.4737
+      },
+      {
+        "fpr": 0.3103,
+        "tpr": 0.4737
+      },
+      {
+        "fpr": 0.3103,
+        "tpr": 0.5
+      },
+      {
+        "fpr": 0.3333,
+        "tpr": 0.5
+      },
+      {
+        "fpr": 0.3333,
+        "tpr": 0.5526
+      },
+      {
+        "fpr": 0.3448,
+        "tpr": 0.5526
+      },
+      {
+        "fpr": 0.3448,
+        "tpr": 0.5789
+      },
+      {
+        "fpr": 0.3793,
+        "tpr": 0.5789
+      },
+      {
+        "fpr": 0.3793,
+        "tpr": 0.6053
+      },
+      {
+        "fpr": 0.4023,
+        "tpr": 0.6053
+      },
+      {
+        "fpr": 0.4023,
+        "tpr": 0.6316
+      },
+      {
+        "fpr": 0.4368,
+        "tpr": 0.6316
+      },
+      {
+        "fpr": 0.4368,
+        "tpr": 0.6579
+      },
+      {
+        "fpr": 0.4713,
+        "tpr": 0.6579
+      },
+      {
+        "fpr": 0.4713,
+        "tpr": 0.6842
+      },
+      {
+        "fpr": 0.5287,
+        "tpr": 0.6842
+      },
+      {
+        "fpr": 0.5287,
+        "tpr": 0.7105
+      },
+      {
+        "fpr": 0.5517,
+        "tpr": 0.7105
+      },
+      {
+        "fpr": 0.5517,
+        "tpr": 0.7368
+      },
+      {
+        "fpr": 0.5747,
+        "tpr": 0.7368
+      },
+      {
+        "fpr": 0.5747,
+        "tpr": 0.7632
+      },
+      {
+        "fpr": 0.5977,
+        "tpr": 0.7632
+      },
+      {
+        "fpr": 0.5977,
+        "tpr": 0.7895
+      },
+      {
+        "fpr": 0.6322,
+        "tpr": 0.7895
+      },
+      {
+        "fpr": 0.6322,
+        "tpr": 0.8421
+      },
+      {
+        "fpr": 0.6897,
+        "tpr": 0.8421
+      },
+      {
+        "fpr": 0.6897,
+        "tpr": 0.8684
+      },
+      {
+        "fpr": 0.7816,
+        "tpr": 0.8684
+      },
+      {
+        "fpr": 0.7816,
+        "tpr": 0.8947
+      },
+      {
+        "fpr": 0.8391,
+        "tpr": 0.8947
+      },
+      {
+        "fpr": 0.8391,
+        "tpr": 0.9474
+      },
+      {
+        "fpr": 0.8736,
+        "tpr": 0.9474
+      },
+      {
+        "fpr": 0.8736,
+        "tpr": 0.9737
+      },
+      {
+        "fpr": 1.0,
+        "tpr": 0.9737
+      },
+      {
+        "fpr": 1.0,
+        "tpr": 1.0
+      }
+    ],
+    "calibration_bins": [
+      {
+        "predicted": 0.134,
+        "observed": 0.2,
+        "n": 25
+      },
+      {
+        "predicted": 0.205,
+        "observed": 0.24,
+        "n": 25
+      },
+      {
+        "predicted": 0.267,
+        "observed": 0.24,
+        "n": 25
+      },
+      {
+        "predicted": 0.408,
+        "observed": 0.4,
+        "n": 25
+      },
+      {
+        "predicted": 0.595,
+        "observed": 0.44,
+        "n": 25
+      }
+    ]
+  },
+  "shap_global_importance": [
+    {
+      "feature": "relationship_history",
+      "mean_abs_shap": 0.3585
+    },
+    {
+      "feature": "pre_rfp_engagement",
+      "mean_abs_shap": 0.3379
+    },
+    {
+      "feature": "ip_security_credentials",
+      "mean_abs_shap": 0.2683
+    },
+    {
+      "feature": "portfolio_similarity",
+      "mean_abs_shap": 0.1916
+    },
+    {
+      "feature": "incumbency",
+      "mean_abs_shap": 0.1456
+    },
+    {
+      "feature": "project_type",
+      "mean_abs_shap": 0.1015
+    },
+    {
+      "feature": "geo_timezone_fit",
+      "mean_abs_shap": 0.0854
+    },
+    {
+      "feature": "client_segment",
+      "mean_abs_shap": 0.0796
+    },
+    {
+      "feature": "effort_person_months",
+      "mean_abs_shap": 0.0738
+    },
+    {
+      "feature": "deal_origin_inbound",
+      "mean_abs_shap": 0.0623
+    },
+    {
+      "feature": "price_position_pct",
+      "mean_abs_shap": 0.0589
+    },
+    {
+      "feature": "competing_bidders",
+      "mean_abs_shap": 0.0492
+    },
+    {
+      "feature": "requirement_coverage",
+      "mean_abs_shap": 0.0169
+    }
+  ],
+  "hypothesis_comparison": [
+    {
+      "feature": "relationship_history",
+      "bu_hypothesis_rank": 1,
+      "shap_rank": 1,
+      "delta": 0
+    },
+    {
+      "feature": "deal_origin_inbound",
+      "bu_hypothesis_rank": 2,
+      "shap_rank": 10,
+      "delta": 8
+    },
+    {
+      "feature": "pre_rfp_engagement",
+      "bu_hypothesis_rank": 3,
+      "shap_rank": 2,
+      "delta": -1
+    },
+    {
+      "feature": "requirement_coverage",
+      "bu_hypothesis_rank": 4,
+      "shap_rank": 13,
+      "delta": 9
+    },
+    {
+      "feature": "incumbency",
+      "bu_hypothesis_rank": 5,
+      "shap_rank": 5,
+      "delta": 0
+    },
+    {
+      "feature": "portfolio_similarity",
+      "bu_hypothesis_rank": 6,
+      "shap_rank": 4,
+      "delta": -2
+    },
+    {
+      "feature": "price_position_pct",
+      "bu_hypothesis_rank": 7,
+      "shap_rank": 11,
+      "delta": 4
+    },
+    {
+      "feature": "geo_timezone_fit",
+      "bu_hypothesis_rank": 8,
+      "shap_rank": 7,
+      "delta": -1
+    },
+    {
+      "feature": "ip_security_credentials",
+      "bu_hypothesis_rank": 9,
+      "shap_rank": 3,
+      "delta": -6
+    },
+    {
+      "feature": "competing_bidders",
+      "bu_hypothesis_rank": 10,
+      "shap_rank": 12,
+      "delta": 2
+    },
+    {
+      "feature": "effort_person_months",
+      "bu_hypothesis_rank": 11,
+      "shap_rank": 9,
+      "delta": -2
+    },
+    {
+      "feature": "client_segment",
+      "bu_hypothesis_rank": 12,
+      "shap_rank": 8,
+      "delta": -4
+    },
+    {
+      "feature": "project_type",
+      "bu_hypothesis_rank": 13,
+      "shap_rank": 6,
+      "delta": -7
+    }
+  ],
+  "spearman_rank_correlation": 0.242,
+  "example_bids": [
+    {
+      "client_segment": "AAA_publisher",
+      "project_type": "Live_ops",
+      "win_probability": 0.703,
+      "actual_outcome": "Won",
+      "top_positive_factors": [
+        {
+          "feature": "pre_rfp_engagement",
+          "contribution": 0.597
+        },
+        {
+          "feature": "ip_security_credentials",
+          "contribution": 0.384
+        },
+        {
+          "feature": "portfolio_similarity",
+          "contribution": 0.362
+        }
+      ],
+      "top_negative_factors": [
+        {
+          "feature": "relationship_history",
+          "contribution": -0.251
+        },
+        {
+          "feature": "incumbency",
+          "contribution": -0.128
+        },
+        {
+          "feature": "competing_bidders",
+          "contribution": 0.006
+        }
+      ]
+    },
+    {
+      "client_segment": "AAA_publisher",
+      "project_type": "Live_ops",
+      "win_probability": 0.526,
+      "actual_outcome": "Won",
+      "top_positive_factors": [
+        {
+          "feature": "relationship_history",
+          "contribution": 0.474
+        },
+        {
+          "feature": "ip_security_credentials",
+          "contribution": 0.384
+        },
+        {
+          "feature": "project_type",
+          "contribution": 0.294
+        }
+      ],
+      "top_negative_factors": [
+        {
+          "feature": "pre_rfp_engagement",
+          "contribution": -0.282
+        },
+        {
+          "feature": "incumbency",
+          "contribution": -0.142
+        },
+        {
+          "feature": "competing_bidders",
+          "contribution": -0.056
+        }
+      ]
+    },
+    {
+      "client_segment": "AAA_publisher",
+      "project_type": "Porting",
+      "win_probability": 0.571,
+      "actual_outcome": "Won",
+      "top_positive_factors": [
+        {
+          "feature": "pre_rfp_engagement",
+          "contribution": 0.509
+        },
+        {
+          "feature": "relationship_history",
+          "contribution": 0.453
+        },
+        {
+          "feature": "ip_security_credentials",
+          "contribution": 0.34
+        }
+      ],
+      "top_negative_factors": [
+        {
+          "feature": "incumbency",
+          "contribution": -0.165
+        },
+        {
+          "feature": "portfolio_similarity",
+          "contribution": -0.096
+        },
+        {
+          "feature": "competing_bidders",
+          "contribution": -0.054
+        }
+      ]
+    },
+    {
+      "client_segment": "Indie_studio",
+      "project_type": "Co_development",
+      "win_probability": 0.097,
+      "actual_outcome": "Lost",
+      "top_positive_factors": [
+        {
+          "feature": "geo_timezone_fit",
+          "contribution": 0.107
+        },
+        {
+          "feature": "price_position_pct",
+          "contribution": 0.026
+        },
+        {
+          "feature": "requirement_coverage",
+          "contribution": 0.017
+        }
+      ],
+      "top_negative_factors": [
+        {
+          "feature": "relationship_history",
+          "contribution": -0.363
+        },
+        {
+          "feature": "portfolio_similarity",
+          "contribution": -0.297
+        },
+        {
+          "feature": "pre_rfp_engagement",
+          "contribution": -0.25
+        }
+      ]
+    },
+    {
+      "client_segment": "Indie_studio",
+      "project_type": "Art_services",
+      "win_probability": 0.202,
+      "actual_outcome": "Lost",
+      "top_positive_factors": [
+        {
+          "feature": "pre_rfp_engagement",
+          "contribution": 0.475
+        },
+        {
+          "feature": "geo_timezone_fit",
+          "contribution": 0.059
+        },
+        {
+          "feature": "effort_person_months",
+          "contribution": 0.032
+        }
+      ],
+      "top_negative_factors": [
+        {
+          "feature": "relationship_history",
+          "contribution": -0.348
+        },
+        {
+          "feature": "ip_security_credentials",
+          "contribution": -0.304
+        },
+        {
+          "feature": "project_type",
+          "contribution": -0.106
+        }
+      ]
+    },
+    {
+      "client_segment": "AAA_publisher",
+      "project_type": "Live_ops",
+      "win_probability": 0.317,
+      "actual_outcome": "Won",
+      "top_positive_factors": [
+        {
+          "feature": "relationship_history",
+          "contribution": 0.52
+        },
+        {
+          "feature": "project_type",
+          "contribution": 0.215
+        },
+        {
+          "feature": "geo_timezone_fit",
+          "contribution": 0.053
+        }
+      ],
+      "top_negative_factors": [
+        {
+          "feature": "ip_security_credentials",
+          "contribution": -0.23
+        },
+        {
+          "feature": "pre_rfp_engagement",
+          "contribution": -0.225
+        },
+        {
+          "feature": "effort_person_months",
+          "contribution": -0.096
+        }
+      ]
+    },
+    {
+      "client_segment": "Midsize_publisher",
+      "project_type": "Co_development",
+      "win_probability": 0.237,
+      "actual_outcome": "Lost",
+      "top_positive_factors": [
+        {
+          "feature": "relationship_history",
+          "contribution": 0.512
+        },
+        {
+          "feature": "price_position_pct",
+          "contribution": 0.037
+        },
+        {
+          "feature": "requirement_coverage",
+          "contribution": 0.004
+        }
+      ],
+      "top_negative_factors": [
+        {
+          "feature": "pre_rfp_engagement",
+          "contribution": -0.241
+        },
+        {
+          "feature": "ip_security_credentials",
+          "contribution": -0.2
+        },
+        {
+          "feature": "geo_timezone_fit",
+          "contribution": -0.091
+        }
+      ]
+    },
+    {
+      "client_segment": "AAA_publisher",
+      "project_type": "Art_services",
+      "win_probability": 0.212,
+      "actual_outcome": "Won",
+      "top_positive_factors": [
+        {
+          "feature": "ip_security_credentials",
+          "contribution": 0.365
+        },
+        {
+          "feature": "effort_person_months",
+          "contribution": 0.118
+        },
+        {
+          "feature": "client_segment",
+          "contribution": 0.082
+        }
+      ],
+      "top_negative_factors": [
+        {
+          "feature": "relationship_history",
+          "contribution": -0.368
+        },
+        {
+          "feature": "pre_rfp_engagement",
+          "contribution": -0.317
+        },
+        {
+          "feature": "geo_timezone_fit",
+          "contribution": -0.109
+        }
+      ]
+    }
+  ],
+  "scorer_base_value": -0.934327575680224,
+  "scorer_model": {
+    "intercept": -0.9123058973876288,
+    "num_features": [
+      "relationship_history",
+      "deal_origin_inbound",
+      "pre_rfp_engagement",
+      "effort_person_months",
+      "price_position_pct",
+      "requirement_coverage",
+      "portfolio_similarity",
+      "geo_timezone_fit",
+      "ip_security_credentials",
+      "competing_bidders"
+    ],
+    "num_means": [
+      1.238,
+      0.32,
+      0.356,
+      96.3802,
+      0.09020000000000004,
+      0.7511400000000001,
+      0.5234200000000001,
+      0.6291,
+      0.438,
+      4.292
+    ],
+    "num_scales": [
+      1.2559283419049034,
+      0.466476151587624,
+      0.4788152044369519,
+      79.17639287034994,
+      9.011108919550358,
+      0.08949916424190787,
+      0.18642345238730026,
+      0.16293247067420294,
+      0.496141108959941,
+      1.8250304107055313
+    ],
+    "num_coefs": [
+      0.46294708290643205,
+      0.11860338071032056,
+      0.5412008796437436,
+      0.12310744518164193,
+      -0.05186976052022284,
+      -0.08739794706890253,
+      0.35345134844778997,
+      0.07528763115302524,
+      0.36947235758307256,
+      -0.22867460430452877
+    ],
+    "cat_features": [
+      "client_segment",
+      "project_type",
+      "incumbency"
+    ],
+    "cat_categories": {
+      "client_segment": [
+        "AAA_publisher",
+        "Indie_studio",
+        "Midsize_publisher",
+        "Platform_holder"
+      ],
+      "project_type": [
+        "Art_services",
+        "Co_development",
+        "Full_development",
+        "Live_ops",
+        "Porting"
+      ],
+      "incumbency": [
+        "Displacement",
+        "Greenfield",
+        "Incumbent_defend"
+      ]
+    },
+    "cat_coefs": {
+      "client_segment_AAA_publisher": 0.23558429658309946,
+      "client_segment_Indie_studio": -0.33715229081270076,
+      "client_segment_Midsize_publisher": -0.15122894373952395,
+      "client_segment_Platform_holder": 0.2504100648885998,
+      "project_type_Art_services": -0.04187759349914875,
+      "project_type_Co_development": -0.03638687959570847,
+      "project_type_Full_development": -0.5408791238094569,
+      "project_type_Live_ops": 0.6299686038368775,
+      "project_type_Porting": -0.013211880013086659,
+      "incumbency_Displacement": -0.4567477611442581,
+      "incumbency_Greenfield": -0.07312426708087849,
+      "incumbency_Incumbent_defend": 0.5274851551446104
+    },
+    "num_medians_for_defaults": [
+      1.0,
+      0.0,
+      0.0,
+      72.3,
+      -0.15000000000000002,
+      0.75,
+      0.52,
+      0.64,
+      0.0,
+      4.0
+    ],
+    "cat_mode_for_defaults": {
+      "client_segment": "Midsize_publisher",
+      "project_type": "Co_development",
+      "incumbency": "Greenfield"
+    },
+    "auc_on_full_data": 0.773,
+    "cv_auc_mean": 0.743,
+    "cv_auc_std": 0.048
+  }
+}

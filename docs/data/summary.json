@@ -1,0 +1,1 @@
+[{"n_rows": 500, "win_rate": 0.306, "model": "GradientBoostingClassifier (scikit-learn)", "n_train": 375, "n_test": 125, "test_auc": 0.632, "cv_auc_mean": 0.705, "cv_auc_std": 0.052, "brier_score": 0.2103, "spearman": 0.242, "tn": 77, "fp": 10, "fn": 28, "tp": 10}]
