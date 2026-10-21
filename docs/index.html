@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bid Competitiveness Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+  :root {
+    --bg: #faf8f4;
+    --panel: #ffffff;
+    --fg: #1c1a16;
+    --fg-muted: #6b6558;
+    --rule: #e4ddd0;
+    --accent: #b5692a;
+    --ok: #1f7a4d;
+    --bad: #b23a3a;
+    --warn-bg: #fbeedb;
+    --warn-border: #e8c988;
+    --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+    --font-serif: "Spectral", Georgia, serif;
+    --font-mono: "IBM Plex Mono", monospace;
+    --radius: 10px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15130f;
+      --panel: #1e1b16;
+      --fg: #efe9dc;
+      --fg-muted: #9a9183;
+      --rule: #322d24;
+      --accent: #d9924a;
+      --ok: #4caf7d;
+      --bad: #e0695f;
+      --warn-bg: #2a2114;
+      --warn-border: #5a4420;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    line-height: 1.45;
+    padding-block: 32px;
+  }
+  .wrap {
+    max-width: 980px;
+    margin-inline: auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .banner {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+  .banner b { color: var(--fg); }
+  code { font-family: var(--font-mono); background: var(--rule); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  h1 { font-family: var(--font-serif); font-weight: 500; font-size: 2rem; margin: 0 0 4px; }
+  .sub { color: var(--fg-muted); margin: 0 0 32px; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 6px; }
+  p.note { color: var(--fg-muted); font-size: 0.85rem; max-width: 62ch; margin: 0 0 16px; line-height: 1.55; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 14px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 18px;
+    min-width: 0;
+  }
+  .card h3 {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--fg-muted); font-weight: 600; margin: 0 0 6px;
+  }
+  .stat { font-family: var(--font-serif); font-size: 1.9rem; font-variant-numeric: tabular-nums; }
+  .stat-sub { color: var(--fg-muted); font-size: 0.78rem; margin-top: 3px; }
+  .two-col { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+  .barrow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .barlabel { width: 10.5rem; flex: 0 0 auto; font-size: 0.78rem; text-align: right; color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bartrack { flex: 1; min-width: 0; height: 15px; background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+  .barfill { height: 100%; background: var(--accent); }
+  .barval { width: 3.2rem; flex: 0 0 auto; font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--fg-muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
+  th { color: var(--fg-muted); font-weight: 600; white-space: nowrap; }
+  td.num, th.num { text-align: right; }
+  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 1px 9px; border-radius: 999px; font-size: 0.76rem; font-weight: 600; }
+  .pill.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+  .pill.bad { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+  .pill.neutral { background: var(--bg); color: var(--fg-muted); border: 1px solid var(--rule); }
+  .cm { display: grid; grid-template-columns: auto 1fr 1fr; gap: 2px; font-size: 0.78rem; max-width: 20rem; }
+  .cm .hd { color: var(--fg-muted); padding: 4px 8px; text-align: center; }
+  .cm .cell { padding: 10px 8px; text-align: center; border-radius: 6px; font-variant-numeric: tabular-nums; font-family: var(--font-serif); font-size: 1.3rem; }
+  .cm .cell.correct { background: color-mix(in srgb, var(--ok) 16%, var(--bg)); color: var(--ok); }
+  .cm .cell.wrong { background: color-mix(in srgb, var(--bad) 12%, var(--bg)); color: var(--bad); }
+  .disclaimer { color: var(--fg-muted); font-size: 0.78rem; margin-top: 10px; line-height: 1.55; }
+  .examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15.5rem), 1fr)); gap: 14px; }
+  .ex-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+  .ex-seg { font-size: 0.78rem; color: var(--fg-muted); }
+  .ex-prob { font-family: var(--font-serif); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+  .factor { display: flex; justify-content: space-between; font-size: 0.78rem; padding: 2px 0; gap: 8px; }
+  .factor .fn { color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .factor .fv { font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+  .factor .fv.pos { color: var(--ok); }
+  .factor .fv.neg { color: var(--bad); }
+  .scorer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px) { .scorer-grid { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+  .field label { font-size: 0.78rem; color: var(--fg-muted); display: flex; justify-content: space-between; }
+  .field label span.val { color: var(--fg); font-variant-numeric: tabular-nums; }
+  .field input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .field select {
+    background: var(--bg); color: var(--fg); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 8px; font-size: 0.9rem; font-family: var(--font-sans);
+  }
+  .scorer-result { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 20px 0; }
+  .scorer-prob { font-family: var(--font-serif); font-size: 3.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .scorer-label { color: var(--fg-muted); font-size: 0.78rem; }
+  .gauge-track { width: 100%; max-width: 20rem; height: 10px; background: var(--bg); border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; margin: 10px 0; }
+  .gauge-fill { height: 100%; border-radius: 999px; transition: width .25s ease; }
+  .factorlist { width: 100%; max-width: 22rem; margin-top: 8px; }
+  .foot { color: var(--fg-muted); font-size: 0.8rem; border-top: 1px solid var(--rule); padding-top: 16px; line-height: 1.6; }
+  .loading { color: var(--fg-muted); font-size: 0.85rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="banner">
+    <b>Synthetic data.</b> Every number below comes from a pipeline run on synthetically generated bids
+    (<code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code>), where feature→outcome
+    relationships were encoded from the Engineering BU's documented hypotheses, not observed from real bids.
+    This validates that the pipeline recovers known signal correctly — it is not a finding about what wins
+    real Virtuos bids. See <a href="../data/methodology_synthetic_data.md">data/methodology_synthetic_data.md</a>.
+  </div>
+
+  <h1>Bid Competitiveness Pipeline</h1>
+  <p class="sub" id="takeaway">Loading pipeline results…</p>
+
+  <section>
+    <h2>Model performance</h2>
+    <p class="note">Gradient-boosted classifier, 5-fold cross-validated, on <span id="nrows">–</span>
+      resolved bids (<span id="winrate">–</span> win rate).</p>
+    <div class="grid">
+      <div class="card">
+        <h3>5-fold CV AUC</h3>
+        <div class="stat" id="cvauc">–</div>
+        <div class="stat-sub" id="cvauc-sub">&nbsp;</div>
+      </div>
+      <div class="card">
+        <h3>Held-out test AUC</h3>
+        <div class="stat" id="testauc">–</div>
+        <div class="stat-sub">Single 75/25 split, 125 bids</div>
+      </div>
+      <div class="card">
+        <h3>Brier score</h3>
+        <div class="stat" id="brier">–</div>
+        <div class="stat-sub">Lower is better-calibrated</div>
+      </div>
+      <div class="card">
+        <h3>SHAP ↔ BU hypothesis rank</h3>
+        <div class="stat" id="spearman">–</div>
+        <div class="stat-sub">Spearman correlation</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="two-col">
+      <div class="card">
+        <h3>ROC curve (held-out test set)</h3>
+        <svg id="roc" width="100%" viewBox="0 0 400 260" style="overflow:visible"></svg>
+      </div>
+      <div class="card">
+        <h3>Confusion matrix (held-out test set, threshold 0.5)</h3>
+        <div class="cm" id="cm"></div>
+        <p class="disclaimer" id="cm-note"></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What SHAP says actually drives the model</h2>
+    <p class="note">Mean absolute SHAP value per feature across all 500 bids — how much each feature
+      moves the model's predicted win probability, on average, up or down.</p>
+    <div class="card" id="shap-chart"><p class="loading">Loading…</p></div>
+  </section>
+
+  <section>
+    <h2>SHAP vs. the BU's documented hypotheses</h2>
+    <p class="note">The BU's feature hypotheses document ranked features by expected importance before
+      any modelling. This compares that rank to where SHAP actually places each feature after training.
+      Because the synthetic data's weights were themselves set from these hypotheses, agreement is expected
+      and is not independent confirmation — the interesting result is where the two ranks diverge, which
+      reflects noise, interaction effects, or class imbalance the model picked up that a flat reading of the
+      hypotheses would not predict.</p>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Feature</th><th class="num">BU hypothesis rank</th><th class="num">SHAP rank</th><th class="num">Shift</th></tr>
+        </thead>
+        <tbody id="hyp-table"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Example bids</h2>
+    <p class="note">Eight bids sampled from the dataset with the model's predicted win probability and
+      the top factors SHAP attributes it to.</p>
+    <div class="examples" id="examples"></div>
+  </section>
+
+  <section>
+    <h2>Score a hypothetical bid</h2>
+    <p class="note">Interactive estimate from a logistic-regression surrogate fit on the same synthetic
+      data (full-data AUC <span id="scorer-auc">–</span>, 5-fold CV AUC <span id="scorer-cvauc">–</span>).
+      A linear model is used here instead of the gradient-boosted model above because its decision function
+      can be evaluated exactly in the browser — every contribution shown is an exact coefficient × value
+      term, not an approximation.</p>
+    <div class="card">
+      <div class="scorer-grid">
+        <div id="scorer-form"><p class="loading">Loading…</p></div>
+        <div class="scorer-result">
+          <div class="gauge-track"><div class="gauge-fill" id="gauge"></div></div>
+          <div class="scorer-prob" id="scorer-prob">–</div>
+          <div class="scorer-label">estimated win probability</div>
+          <div class="factorlist" id="scorer-factors"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    Pipeline: <code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code> →
+    <code>outputs/model_results.json</code> → <code>dashboard/make_tables.py</code> (this page's data
+    source, under <code>docs/data/</code>). Full methodology and limitations in
+    <a href="https://github.com/Ap001530/BidWinLoss-tool/blob/main/data/methodology_synthetic_data.md">data/methodology_synthetic_data.md</a>.
+    Source: <a href="https://github.com/Ap001530/BidWinLoss-tool">Ap001530/BidWinLoss-tool</a>.
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const fmtPct = (x) => d3.format(".1%")(x);
+  const fmtAuc = (x) => d3.format(".3f")(x);
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  const FEATURE_LABELS = {
+    relationship_history: "Relationship history",
+    deal_origin_inbound: "Deal origin (inbound)",
+    pre_rfp_engagement: "Pre-RFP engagement",
+    incumbency: "Incumbency",
+    effort_person_months: "Effort (person-months)",
+    price_position_pct: "Price position (%)",
+    requirement_coverage: "Requirement coverage",
+    portfolio_similarity: "Portfolio similarity",
+    geo_timezone_fit: "Geo / timezone fit",
+    ip_security_credentials: "IP security credentials",
+    competing_bidders: "Competing bidders",
+    client_segment: "Client segment",
+    project_type: "Project type",
+  };
+  const label = (f) => FEATURE_LABELS[f] || String(f).replace(/_/g, " ");
+
+  const DATA_DIR = "data";
+  const load = (name) => fetch(`${DATA_DIR}/${name}.json`).then((r) => {
+    if (!r.ok) throw new Error(`${name}: HTTP ${r.status}`);
+    return r.json();
+  });
+
+  function renderPerformance(s) {
+    document.getElementById("nrows").textContent = d3.format(",")(s.n_rows);
+    document.getElementById("winrate").textContent = fmtPct(s.win_rate);
+    document.getElementById("cvauc").textContent = fmtAuc(s.cv_auc_mean);
+    document.getElementById("cvauc-sub").textContent = "± " + fmtAuc(s.cv_auc_std) + " across 5 folds";
+    document.getElementById("testauc").textContent = fmtAuc(s.test_auc);
+    document.getElementById("brier").textContent = d3.format(".4f")(s.brier_score);
+    document.getElementById("spearman").textContent = d3.format(".2f")(s.spearman);
+    document.getElementById("takeaway").textContent =
+      `Recovers known signal at AUC ${fmtAuc(s.cv_auc_mean)} (5-fold CV); ` +
+      `SHAP ranking agrees with the BU's stated hypotheses at ρ = ${d3.format(".2f")(s.spearman)}.`;
+  }
+
+  function renderRoc(rows) {
+    const svg = d3.select("#roc");
+    svg.selectAll("*").remove();
+    const W = 400, H = 260, M = { t: 10, r: 14, b: 30, l: 34 };
+    const x = d3.scaleLinear([0, 1], [M.l, W - M.r]);
+    const y = d3.scaleLinear([0, 1], [H - M.b, M.t]);
+
+    svg.append("line").attr("x1", x(0)).attr("y1", y(0)).attr("x2", x(1)).attr("y2", y(1))
+      .attr("stroke", "var(--rule)").attr("stroke-dasharray", "3,3");
+
+    [0, .5, 1].forEach((t) => {
+      svg.append("line").attr("x1", x(t)).attr("x2", x(t)).attr("y1", y(0)).attr("y2", y(1)).attr("stroke", "var(--rule)");
+      svg.append("line").attr("x1", x(0)).attr("x2", x(1)).attr("y1", y(t)).attr("y2", y(t)).attr("stroke", "var(--rule)");
+      svg.append("text").attr("x", x(t)).attr("y", H - M.b + 16).attr("text-anchor", "middle")
+        .attr("fill", "var(--fg-muted)").attr("font-size", 10).text(t);
+      svg.append("text").attr("x", M.l - 8).attr("y", y(t) + 3).attr("text-anchor", "end")
+        .attr("fill", "var(--fg-muted)").attr("font-size", 10).text(t);
+    });
+    svg.append("text").attr("x", (M.l + W - M.r) / 2).attr("y", H - 2).attr("text-anchor", "middle")
+      .attr("fill", "var(--fg-muted)").attr("font-size", 10).text("False positive rate");
+    svg.append("text").attr("x", 10).attr("y", H / 2).attr("text-anchor", "middle")
+      .attr("fill", "var(--fg-muted)").attr("font-size", 10)
+      .attr("transform", `rotate(-90, 10, ${H / 2})`).text("True positive rate");
+
+    const sorted = rows.slice().sort((a, b) => a.fpr - b.fpr || a.tpr - b.tpr);
+    const line = d3.line().x((d) => x(d.fpr)).y((d) => y(d.tpr));
+    svg.append("path").datum(sorted).attr("d", line).attr("fill", "none")
+      .attr("stroke", "var(--accent)").attr("stroke-width", 2.5).attr("stroke-linejoin", "round");
+  }
+
+  function renderConfusion(s) {
+    document.getElementById("cm").innerHTML = `
+      <div></div><div class="hd">Predicted Lost</div><div class="hd">Predicted Won</div>
+      <div class="hd" style="text-align:right">Actual Lost</div>
+      <div class="cell correct">${s.tn}</div><div class="cell wrong">${s.fp}</div>
+      <div class="hd" style="text-align:right">Actual Won</div>
+      <div class="cell wrong">${s.fn}</div><div class="cell correct">${s.tp}</div>
+    `;
+    const total = s.tn + s.fp + s.fn + s.tp;
+    const acc = (s.tn + s.tp) / total;
+    document.getElementById("cm-note").textContent =
+      `Accuracy ${fmtPct(acc)} at the default 0.5 threshold. With a ~30% base win rate, a lower threshold ` +
+      `trades false positives for catching more true wins — AUC is the threshold-free summary above.`;
+  }
+
+  function renderShapChart(rows) {
+    const data = rows.slice().sort((a, b) => b.mean_abs_shap - a.mean_abs_shap);
+    const max = d3.max(data, (d) => d.mean_abs_shap);
+    document.getElementById("shap-chart").innerHTML = data.map((d) => `
+      <div class="barrow">
+        <div class="barlabel">${esc(label(d.feature))}</div>
+        <div class="bartrack"><div class="barfill" style="width:${(d.mean_abs_shap / max * 100).toFixed(1)}%"></div></div>
+        <div class="barval">${d3.format(".3f")(d.mean_abs_shap)}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderHypothesisTable(rows) {
+    const sorted = rows.slice().sort((a, b) => a.bu_hypothesis_rank - b.bu_hypothesis_rank);
+    document.getElementById("hyp-table").innerHTML = sorted.map((d) => {
+      const shift = d.delta;
+      const pillClass = shift === 0 ? "neutral" : (Math.abs(shift) <= 2 ? "neutral" : (shift > 0 ? "bad" : "ok"));
+      const arrow = shift === 0 ? "—" : (shift > 0 ? `↓ ${shift}` : `↑ ${-shift}`);
+      return `
+        <tr>
+          <td>${esc(label(d.feature))}</td>
+          <td class="num">#${d.bu_hypothesis_rank}</td>
+          <td class="num">#${d.shap_rank}</td>
+          <td class="num"><span class="pill ${pillClass}">${arrow}</span></td>
+        </tr>`;
+    }).join("");
+  }
+
+  function renderExamples(rows) {
+    document.getElementById("examples").innerHTML = rows.map((ex) => {
+      const won = ex.actual_outcome === "Won";
+      const pos = [1, 2, 3].map((i) => ({ feature: ex[`pos${i}_feature`], contribution: ex[`pos${i}_value`] }))
+        .filter((f) => f.feature != null && f.contribution > 0);
+      const neg = [1, 2, 3].map((i) => ({ feature: ex[`neg${i}_feature`], contribution: ex[`neg${i}_value`] }))
+        .filter((f) => f.feature != null && f.contribution < 0);
+      return `
+        <div class="card">
+          <div class="ex-head">
+            <div>
+              <div>${esc(label(ex.client_segment))}</div>
+              <div class="ex-seg">${esc(label(ex.project_type))} · actually
+                <span class="pill ${won ? "ok" : "bad"}">${ex.actual_outcome}</span></div>
+            </div>
+            <div class="ex-prob">${fmtPct(ex.win_probability)}</div>
+          </div>
+          ${pos.map((f) => `<div class="factor"><span class="fn">↑ ${esc(label(f.feature))}</span><span class="fv pos">+${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+          ${neg.map((f) => `<div class="factor"><span class="fn">↓ ${esc(label(f.feature))}</span><span class="fv neg">${d3.format(".2f")(f.contribution)}</span></div>`).join("")}
+        </div>`;
+    }).join("");
+  }
+
+  // ---- Interactive scorer ----
+  let scorerState = {};
+
+  function buildScorerForm(numRows, catRows, metaRow) {
+    const numDefs = {
+      relationship_history: { min: 0, max: 3, step: 1, fmt: (v) => ["New", "Prior (poor)", "Prior (neutral)", "Prior (good)"][v] },
+      deal_origin_inbound: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Inbound" : "Outbound") },
+      pre_rfp_engagement: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Engaged pre-RFP" : "No pre-RFP contact") },
+      effort_person_months: { min: 10, max: 400, step: 5, fmt: (v) => v + " pm" },
+      price_position_pct: { min: -30, max: 30, step: 1, fmt: (v) => (v > 0 ? "+" : "") + v + "%" },
+      requirement_coverage: { min: 0.5, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
+      portfolio_similarity: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
+      geo_timezone_fit: { min: 0, max: 1, step: 0.01, fmt: (v) => d3.format(".0%")(v) },
+      ip_security_credentials: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Has credentials" : "No credentials") },
+      competing_bidders: { min: 1, max: 10, step: 1, fmt: (v) => v },
+    };
+
+    numRows.forEach((r) => { scorerState[r.feature] = r.default; });
+    const catFeatures = [...new Set(catRows.map((r) => r.feature))];
+    catFeatures.forEach((f) => {
+      const def = catRows.find((r) => r.feature === f && r.is_default);
+      scorerState[f] = def ? def.category : catRows.find((r) => r.feature === f).category;
+    });
+
+    const form = document.getElementById("scorer-form");
+    const numHtml = numRows.map((r) => {
+      const f = r.feature;
+      const d = numDefs[f] || { min: 0, max: 1, step: 0.01, fmt: (v) => v };
+      return `<div class="field">
+        <label for="f-${f}">${esc(label(f))} <span class="val" id="v-${f}">${esc(d.fmt(scorerState[f]))}</span></label>
+        <input type="range" id="f-${f}" min="${d.min}" max="${d.max}" step="${d.step}" value="${scorerState[f]}">
+      </div>`;
+    }).join("");
+    const catHtml = catFeatures.map((f) => {
+      const opts = catRows.filter((r) => r.feature === f).map((r) =>
+        `<option value="${esc(r.category)}" ${r.category === scorerState[f] ? "selected" : ""}>${esc(label(r.category))}</option>`
+      ).join("");
+      return `<div class="field">
+        <label for="f-${f}">${esc(label(f))}</label>
+        <select id="f-${f}">${opts}</select>
+      </div>`;
+    }).join("");
+    form.innerHTML = numHtml + catHtml;
+
+    const computeScore = () => {
+      let logit = metaRow.intercept;
+      const contribs = [];
+      numRows.forEach((r) => {
+        const z = (scorerState[r.feature] - r.mean) / r.scale;
+        const c = r.coef * z;
+        logit += c;
+        contribs.push({ feature: r.feature, contribution: c });
+      });
+      catFeatures.forEach((f) => {
+        const row = catRows.find((r) => r.feature === f && r.category === scorerState[f]);
+        const c = row ? row.coef : 0;
+        logit += c;
+        contribs.push({ feature: f, contribution: c, catValue: scorerState[f] });
+      });
+      const prob = 1 / (1 + Math.exp(-logit));
+
+      document.getElementById("scorer-prob").textContent = fmtPct(prob);
+      const gauge = document.getElementById("gauge");
+      gauge.style.width = (prob * 100).toFixed(1) + "%";
+      gauge.style.background = prob >= 0.5 ? "var(--ok)" : (prob >= 0.3 ? "var(--accent)" : "var(--bad)");
+
+      contribs.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
+      const top = contribs.slice(0, 5);
+      document.getElementById("scorer-factors").innerHTML = top.map((c) => {
+        const name = c.catValue ? `${label(c.feature)}: ${label(c.catValue)}` : label(c.feature);
+        const cls = c.contribution >= 0 ? "pos" : "neg";
+        const sign = c.contribution >= 0 ? "+" : "";
+        return `<div class="factor"><span class="fn">${esc(name)}</span><span class="fv ${cls}">${sign}${d3.format(".2f")(c.contribution)}</span></div>`;
+      }).join("");
+    };
+
+    numRows.forEach((r) => {
+      const f = r.feature;
+      const d = numDefs[f] || { fmt: (v) => v };
+      document.getElementById(`f-${f}`).addEventListener("input", (e) => {
+        const v = Number(e.target.value);
+        scorerState[f] = v;
+        document.getElementById(`v-${f}`).textContent = d.fmt(v);
+        computeScore();
+      });
+    });
+    catFeatures.forEach((f) => {
+      document.getElementById(`f-${f}`).addEventListener("change", (e) => {
+        scorerState[f] = e.target.value;
+        computeScore();
+      });
+    });
+
+    document.getElementById("scorer-auc").textContent = fmtAuc(metaRow.auc_on_full_data);
+    document.getElementById("scorer-cvauc").textContent = fmtAuc(metaRow.cv_auc_mean);
+
+    computeScore();
+  }
+
+  Promise.all([
+    load("summary"), load("roc_curve"), load("shap_importance"),
+    load("hypothesis_comparison"), load("examples"),
+    load("scorer_num"), load("scorer_cat"), load("scorer_meta"),
+  ]).then(([summary, roc, shap, hyp, examples, scorerNum, scorerCat, scorerMeta]) => {
+    renderPerformance(summary[0]);
+    renderRoc(roc);
+    renderConfusion(summary[0]);
+    renderShapChart(shap);
+    renderHypothesisTable(hyp);
+    renderExamples(examples);
+    buildScorerForm(scorerNum, scorerCat, scorerMeta[0]);
+  }).catch((err) => {
+    document.getElementById("takeaway").textContent = "Failed to load pipeline data: " + err.message;
+    console.error(err);
+  });
+})();
+</script>
+</body>
+</html>
