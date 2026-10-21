@@ -130,7 +130,7 @@
   [data-dash-source-state="loading"] { opacity: .5; }
 </style>
 
-<div data-source="results">
+<div data-source="summary">
   <div class="bwl-banner">
     <b>Synthetic data.</b> Every number below comes from a pipeline run on synthetically generated bids
     (<code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code>), where feature→outcome
@@ -174,7 +174,7 @@
 
   <div class="bwl-section">
     <div class="bwl-two-col">
-      <div class="bwl-card">
+      <div class="bwl-card" data-source="roc_curve">
         <h3>ROC curve (held-out test set)</h3>
         <svg id="bwl-roc" width="100%" viewBox="0 0 400 260" style="overflow:visible"></svg>
       </div>
@@ -186,14 +186,14 @@
     </div>
   </div>
 
-  <div class="bwl-section">
+  <div class="bwl-section" data-source="shap_importance">
     <h2>What SHAP says actually drives the model</h2>
     <p class="bwl-note">Mean absolute SHAP value per feature across all 500 bids — how much each feature
       moves the model's predicted win probability, on average, up or down.</p>
     <div class="bwl-card" id="bwl-shap-chart"></div>
   </div>
 
-  <div class="bwl-section">
+  <div class="bwl-section" data-source="hypothesis_comparison">
     <h2>SHAP vs. the BU's documented hypotheses</h2>
     <p class="bwl-note">The BU's feature hypotheses document ranked features by expected importance before
       any modelling. This compares that rank to where SHAP actually places each feature after training.
@@ -211,7 +211,7 @@
     </div>
   </div>
 
-  <div class="bwl-section">
+  <div class="bwl-section" data-source="examples">
     <h2>Example bids</h2>
     <p class="bwl-note">Eight bids sampled from the dataset with the model's predicted win probability and
       the top factors SHAP attributes it to.</p>
@@ -219,7 +219,7 @@
   </div>
 </div>
 
-<div class="bwl-section" data-source="results">
+<div class="bwl-section" data-source="scorer_num scorer_cat scorer_meta">
   <h2>Score a hypothetical bid</h2>
   <p class="bwl-note">Interactive estimate from a logistic-regression surrogate fit on the same synthetic
     data (full-data AUC <span id="bwl-scorer-auc">–</span>, 5-fold CV AUC <span id="bwl-scorer-cvauc">–</span>).
@@ -241,8 +241,8 @@
 
 <div class="bwl-foot">
   Pipeline: <code>data/generate_synthetic_bids.py</code> → <code>src/train_model.py</code> →
-  <code>outputs/model_results.json</code> (this dashboard's only data source). Full methodology and
-  limitations in <code>data/methodology_synthetic_data.md</code>.
+  <code>outputs/model_results.json</code> (split into per-section datasets for this dashboard). Full
+  methodology and limitations in <code>data/methodology_synthetic_data.md</code>.
 </div>
 
 <script>
@@ -268,23 +268,23 @@
   };
   const label = (f) => FEATURE_LABELS[f] || String(f).replace(/_/g, " ");
 
-  function renderPerformance(r) {
-    document.getElementById("bwl-nrows").textContent = d3.format(",")(r.meta.n_rows);
-    document.getElementById("bwl-winrate").textContent = fmtPct(r.meta.win_rate);
-    document.getElementById("bwl-cvauc").textContent = fmtAuc(r.performance.cv_auc_mean);
-    document.getElementById("bwl-cvauc-sub").textContent = "± " + fmtAuc(r.performance.cv_auc_std) + " across 5 folds";
-    document.getElementById("bwl-testauc").textContent = fmtAuc(r.performance.test_auc);
-    document.getElementById("bwl-brier").textContent = d3.format(".4f")(r.performance.brier_score);
-    document.getElementById("bwl-spearman").textContent = d3.format(".2f")(r.spearman_rank_correlation);
+  function renderPerformance(s) {
+    document.getElementById("bwl-nrows").textContent = d3.format(",")(s.n_rows);
+    document.getElementById("bwl-winrate").textContent = fmtPct(s.win_rate);
+    document.getElementById("bwl-cvauc").textContent = fmtAuc(s.cv_auc_mean);
+    document.getElementById("bwl-cvauc-sub").textContent = "± " + fmtAuc(s.cv_auc_std) + " across 5 folds";
+    document.getElementById("bwl-testauc").textContent = fmtAuc(s.test_auc);
+    document.getElementById("bwl-brier").textContent = d3.format(".4f")(s.brier_score);
+    document.getElementById("bwl-spearman").textContent = d3.format(".2f")(s.spearman);
 
     const take = document.getElementById("bwl-takeaway");
-    take.textContent = `Recovers known signal at AUC ${fmtAuc(r.performance.cv_auc_mean)} (5-fold CV); ` +
-      `SHAP ranking agrees with the BU's stated hypotheses at ρ = ${d3.format(".2f")(r.spearman_rank_correlation)}.`;
+    take.textContent = `Recovers known signal at AUC ${fmtAuc(s.cv_auc_mean)} (5-fold CV); ` +
+      `SHAP ranking agrees with the BU's stated hypotheses at ρ = ${d3.format(".2f")(s.spearman)}.`;
 
     document.querySelectorAll(".dash-skeleton").forEach((el) => el.classList.remove("dash-skeleton"));
   }
 
-  function renderRoc(r) {
+  function renderRoc(rows) {
     const svg = d3.select("#bwl-roc");
     svg.selectAll("*").remove();
     const W = 400, H = 260, M = { t: 10, r: 14, b: 30, l: 34 };
@@ -310,34 +310,30 @@
       .attr("fill", "var(--color-fg-muted)").attr("font-size", 10)
       .attr("transform", `rotate(-90, 10, ${H / 2})`).text("True positive rate");
 
+    const sorted = rows.slice().sort((a, b) => a.fpr - b.fpr || a.tpr - b.tpr);
     const line = d3.line().x((d) => x(d.fpr)).y((d) => y(d.tpr));
-    svg.append("path").datum(r.performance.roc_curve).attr("d", line).attr("fill", "none")
+    svg.append("path").datum(sorted).attr("d", line).attr("fill", "none")
       .attr("stroke", "var(--accent)").attr("stroke-width", 2.5).attr("stroke-linejoin", "round");
-
-    svg.append("text").attr("x", W - M.r).attr("y", M.t + 12).attr("text-anchor", "end")
-      .attr("fill", "var(--color-fg-muted)").attr("font-size", 11)
-      .text("AUC = " + fmtAuc(r.performance.test_auc));
   }
 
-  function renderConfusion(r) {
-    const cm = r.performance.confusion_matrix;
+  function renderConfusion(s) {
     const root = document.getElementById("bwl-cm");
     root.innerHTML = `
       <div></div><div class="hd">Predicted Lost</div><div class="hd">Predicted Won</div>
       <div class="hd" style="text-align:right">Actual Lost</div>
-      <div class="cell correct">${cm.tn}</div><div class="cell wrong">${cm.fp}</div>
+      <div class="cell correct">${s.tn}</div><div class="cell wrong">${s.fp}</div>
       <div class="hd" style="text-align:right">Actual Won</div>
-      <div class="cell wrong">${cm.fn}</div><div class="cell correct">${cm.tp}</div>
+      <div class="cell wrong">${s.fn}</div><div class="cell correct">${s.tp}</div>
     `;
-    const total = cm.tn + cm.fp + cm.fn + cm.tp;
-    const acc = (cm.tn + cm.tp) / total;
+    const total = s.tn + s.fp + s.fn + s.tp;
+    const acc = (s.tn + s.tp) / total;
     document.getElementById("bwl-cm-note").textContent =
       `Accuracy ${fmtPct(acc)} at the default 0.5 threshold. With a ~30% base win rate, a lower threshold ` +
       `trades false positives for catching more true wins — AUC is the threshold-free summary above.`;
   }
 
-  function renderShapChart(r) {
-    const data = r.shap_global_importance;
+  function renderShapChart(rows) {
+    const data = rows.slice().sort((a, b) => b.mean_abs_shap - a.mean_abs_shap);
     const max = d3.max(data, (d) => d.mean_abs_shap);
     const root = document.getElementById("bwl-shap-chart");
     root.innerHTML = data.map((d) => `
@@ -349,9 +345,9 @@
     `).join("");
   }
 
-  function renderHypothesisTable(r) {
-    const rows = r.hypothesis_comparison.slice().sort((a, b) => a.bu_hypothesis_rank - b.bu_hypothesis_rank);
-    document.getElementById("bwl-hyp-table").innerHTML = rows.map((d) => {
+  function renderHypothesisTable(rows) {
+    const sorted = rows.slice().sort((a, b) => a.bu_hypothesis_rank - b.bu_hypothesis_rank);
+    document.getElementById("bwl-hyp-table").innerHTML = sorted.map((d) => {
       const shift = d.delta;
       const pillClass = shift === 0 ? "neutral" : (Math.abs(shift) <= 2 ? "neutral" : (shift > 0 ? "bad" : "ok"));
       const arrow = shift === 0 ? "—" : (shift > 0 ? `↓ ${shift}` : `↑ ${-shift}`);
@@ -365,11 +361,13 @@
     }).join("");
   }
 
-  function renderExamples(r) {
-    document.getElementById("bwl-examples").innerHTML = r.example_bids.map((ex) => {
+  function renderExamples(rows) {
+    document.getElementById("bwl-examples").innerHTML = rows.map((ex) => {
       const won = ex.actual_outcome === "Won";
-      const pos = ex.top_positive_factors.filter((f) => f.contribution > 0);
-      const neg = ex.top_negative_factors.filter((f) => f.contribution < 0);
+      const pos = [1, 2, 3].map((i) => ({ feature: ex[`pos${i}_feature`], contribution: ex[`pos${i}_value`] }))
+        .filter((f) => f.feature != null && f.contribution > 0);
+      const neg = [1, 2, 3].map((i) => ({ feature: ex[`neg${i}_feature`], contribution: ex[`neg${i}_value`] }))
+        .filter((f) => f.feature != null && f.contribution < 0);
       return `
         <div class="bwl-card">
           <div class="bwl-ex-head">
@@ -387,15 +385,12 @@
   }
 
   // ---- Interactive scorer ----
-  let scorerModel = null;
-  const scorerState = {};
+  let scorerState = {};
+  let numRows = [];
+  let catRows = [];
+  let metaRow = null;
 
-  function defaultCatFor(cat) {
-    return scorerModel.cat_mode_for_defaults[cat];
-  }
-
-  function buildScorerForm(sm) {
-    scorerModel = sm;
+  function buildScorerForm() {
     const numDefs = {
       relationship_history: { min: 0, max: 3, step: 1, fmt: (v) => ["New", "Prior (poor)", "Prior (neutral)", "Prior (good)"][v] },
       deal_origin_inbound: { min: 0, max: 1, step: 1, fmt: (v) => (v ? "Inbound" : "Outbound") },
@@ -409,19 +404,26 @@
       competing_bidders: { min: 1, max: 10, step: 1, fmt: (v) => v },
     };
 
-    sm.num_features.forEach((f, i) => { scorerState[f] = sm.num_medians_for_defaults[i]; });
-    sm.cat_features.forEach((f) => { scorerState[f] = defaultCatFor(f); });
+    numRows.forEach((r) => { scorerState[r.feature] = r.default; });
+    const catFeatures = [...new Set(catRows.map((r) => r.feature))];
+    catFeatures.forEach((f) => {
+      const def = catRows.find((r) => r.feature === f && r.is_default);
+      scorerState[f] = def ? def.category : catRows.find((r) => r.feature === f).category;
+    });
 
     const form = document.getElementById("bwl-scorer-form");
-    const numHtml = sm.num_features.map((f) => {
-      const d = numDefs[f];
+    const numHtml = numRows.map((r) => {
+      const f = r.feature;
+      const d = numDefs[f] || { min: 0, max: 1, step: 0.01, fmt: (v) => v };
       return `<div class="bwl-field">
         <label for="f-${f}">${esc(label(f))} <span class="val" id="v-${f}">${esc(d.fmt(scorerState[f]))}</span></label>
         <input type="range" id="f-${f}" min="${d.min}" max="${d.max}" step="${d.step}" value="${scorerState[f]}">
       </div>`;
     }).join("");
-    const catHtml = sm.cat_features.map((f) => {
-      const opts = sm.cat_categories[f].map((c) => `<option value="${esc(c)}" ${c === scorerState[f] ? "selected" : ""}>${esc(label(c))}</option>`).join("");
+    const catHtml = catFeatures.map((f) => {
+      const opts = catRows.filter((r) => r.feature === f).map((r) =>
+        `<option value="${esc(r.category)}" ${r.category === scorerState[f] ? "selected" : ""}>${esc(label(r.category))}</option>`
+      ).join("");
       return `<div class="bwl-field">
         <label for="f-${f}">${esc(label(f))}</label>
         <select id="f-${f}">${opts}</select>
@@ -429,40 +431,42 @@
     }).join("");
     form.innerHTML = numHtml + catHtml;
 
-    sm.num_features.forEach((f) => {
+    numRows.forEach((r) => {
+      const f = r.feature;
+      const d = numDefs[f] || { fmt: (v) => v };
       document.getElementById(`f-${f}`).addEventListener("input", (e) => {
         const v = Number(e.target.value);
         scorerState[f] = v;
-        document.getElementById(`v-${f}`).textContent = numDefs[f].fmt(v);
+        document.getElementById(`v-${f}`).textContent = d.fmt(v);
         computeScore();
       });
     });
-    sm.cat_features.forEach((f) => {
+    catFeatures.forEach((f) => {
       document.getElementById(`f-${f}`).addEventListener("change", (e) => {
         scorerState[f] = e.target.value;
         computeScore();
       });
     });
 
-    document.getElementById("bwl-scorer-auc").textContent = fmtAuc(sm.auc_on_full_data);
-    document.getElementById("bwl-scorer-cvauc").textContent = fmtAuc(sm.cv_auc_mean);
+    document.getElementById("bwl-scorer-auc").textContent = fmtAuc(metaRow.auc_on_full_data);
+    document.getElementById("bwl-scorer-cvauc").textContent = fmtAuc(metaRow.cv_auc_mean);
 
     computeScore();
   }
 
   function computeScore() {
-    const sm = scorerModel;
-    let logit = sm.intercept;
+    let logit = metaRow.intercept;
     const contribs = [];
-    sm.num_features.forEach((f, i) => {
-      const z = (scorerState[f] - sm.num_means[i]) / sm.num_scales[i];
-      const c = sm.num_coefs[i] * z;
+    numRows.forEach((r) => {
+      const z = (scorerState[r.feature] - r.mean) / r.scale;
+      const c = r.coef * z;
       logit += c;
-      contribs.push({ feature: f, contribution: c });
+      contribs.push({ feature: r.feature, contribution: c });
     });
-    sm.cat_features.forEach((f) => {
-      const key = `${f}_${scorerState[f]}`;
-      const c = sm.cat_coefs[key] || 0;
+    const catFeatures = [...new Set(catRows.map((r) => r.feature))];
+    catFeatures.forEach((f) => {
+      const row = catRows.find((r) => r.feature === f && r.category === scorerState[f]);
+      const c = row ? row.coef : 0;
       logit += c;
       contribs.push({ feature: f, contribution: c, catValue: scorerState[f] });
     });
@@ -483,17 +487,29 @@
     }).join("");
   }
 
-  dash.onData((status) => {
-    const d = dash.data("results");
-    if (d.status !== "ok") return;
-    const r = d.data;
-    renderPerformance(r);
-    renderRoc(r);
-    renderConfusion(r);
-    renderShapChart(r);
-    renderHypothesisTable(r);
-    renderExamples(r);
-    buildScorerForm(r.scorer_model);
+  dash.onData(() => {
+    const summary = dash.data("summary");
+    const roc = dash.data("roc_curve");
+    const shap = dash.data("shap_importance");
+    const hyp = dash.data("hypothesis_comparison");
+    const examples = dash.data("examples");
+    const scorerNum = dash.data("scorer_num");
+    const scorerCat = dash.data("scorer_cat");
+    const scorerMeta = dash.data("scorer_meta");
+
+    if (summary.status === "ok" && summary.data[0]) renderPerformance(summary.data[0]);
+    if (roc.status === "ok") renderRoc(roc.data);
+    if (summary.status === "ok" && summary.data[0]) renderConfusion(summary.data[0]);
+    if (shap.status === "ok") renderShapChart(shap.data);
+    if (hyp.status === "ok") renderHypothesisTable(hyp.data);
+    if (examples.status === "ok") renderExamples(examples.data);
+
+    if (scorerNum.status === "ok" && scorerCat.status === "ok" && scorerMeta.status === "ok" && scorerMeta.data[0]) {
+      numRows = scorerNum.data;
+      catRows = scorerCat.data;
+      metaRow = scorerMeta.data[0];
+      buildScorerForm();
+    }
   });
 })();
 </script>

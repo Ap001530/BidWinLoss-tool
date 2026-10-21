@@ -8,10 +8,31 @@ Artifact itself.
 
 **Live artifact:** https://claude.ai/artifact/SbM2Nh2HSxJpnopa5ADTwG
 
+## Why `tables/*.json` instead of `outputs/model_results.json` directly
+
+The dashboard type only loads **tabular** data (an array of row objects) from
+an attached file source — it refused `outputs/model_results.json` as-is
+("the file has no rows this dashboard can read") because that file is one
+nested JSON object, not a flat table. `make_tables.py` flattens it into nine
+small row-array files, one per dashboard section, each attached as its own
+dataset:
+
+| Dataset | Rows | Feeds |
+|---|---|---|
+| `summary` | 1 | headline AUC/Brier/Spearman stats, confusion matrix |
+| `roc_curve` | 60 | ROC curve |
+| `calibration` | 5 | (reserved — calibration bins, not currently drawn) |
+| `shap_importance` | 13 | global SHAP bar chart |
+| `hypothesis_comparison` | 13 | SHAP-vs-BU-hypothesis table |
+| `examples` | 8 | example bid cards |
+| `scorer_num` | 10 | scorer: numeric coefficients |
+| `scorer_cat` | 12 | scorer: categorical coefficients |
+| `scorer_meta` | 1 | scorer: intercept + AUC |
+
 ## What it shows
 
-Every number on the page is read from `outputs/model_results.json` (the single
-data source attached to the dashboard) — nothing is hand-typed:
+Every number on the page is read from one of the datasets above (ultimately
+derived from `outputs/model_results.json`) — nothing is hand-typed:
 
 1. **Synthetic-data disclaimer** — up front, matching `data/methodology_synthetic_data.md`.
 2. **Model performance** — 5-fold CV AUC, held-out test AUC, Brier score,
@@ -37,7 +58,9 @@ data source attached to the dashboard) — nothing is hand-typed:
 ```bash
 python3 data/generate_synthetic_bids.py
 python3 src/train_model.py          # writes outputs/model_results.json
+python3 dashboard/make_tables.py    # writes dashboard/tables/*.json
 ```
 
-Then re-publish `outputs/model_results.json` as the dashboard's attached
-dataset file and republish `dashboard/index.html` as its page.
+Then re-upload each file in `dashboard/tables/` as an asset on the dashboard
+Artifact, point each `datasets/<id>` document at its new asset url, and
+republish `dashboard/index.html` as its page.
