@@ -11,6 +11,7 @@ pandoc metadata.yaml $CHAPTERS \
   --bibliography references.bib \
   --toc --toc-depth=3 \
   --number-sections \
+  --reference-doc=reference.docx \
   -o thesis.docx
 
 echo "Built thesis/thesis.docx"
