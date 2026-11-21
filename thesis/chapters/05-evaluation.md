@@ -20,6 +20,10 @@ The 5-fold cross-validated AUC of 0.705 is the more reliable headline figure, si
 
 The Brier score of 0.2103 measures how close the model's predicted probabilities are to the actual outcomes, averaged over the test set, where 0 is a perfect forecast and 0.25 is what a model achieves by always predicting the dataset's base win rate (approximately 30%) regardless of any feature. A Brier score of 0.21, modestly below that 0.25 naive baseline, indicates the model is extracting some genuine probability-calibration benefit from the features, though the margin is not large, consistent with the AUC result above.
 
+![Figure 5.1: ROC curve for the gradient-boosted model on the held-out test set.](figures/fig5-1-roc-curve.png)
+
+Figure 5.1 plots the ROC curve the test-set AUC in Table 5.1 is computed from. Its shape is informative beyond the single summary number: the curve sits consistently above the diagonal across almost the entire false-positive-rate range rather than only in one region, which indicates the model's ranking ability is reasonably uniform rather than concentrated at one end of the probability scale (for example, being good only at confidently identifying the most obviously winnable bids while offering no real separation among the rest). The step-like shape is a direct consequence of the test set's modest size (125 bids); with only 38 actual wins to rank against 87 actual losses, each individual bid's position in the model's probability ordering moves the curve by a visible, discrete step, and a larger real-data test set would be expected to produce a visibly smoother curve at the same underlying AUC.
+
 ### Confusion Matrix and Derived Classification Metrics
 
 Table 5.2 reports the confusion matrix at the default 0.5 classification threshold on the held-out test set, together with the classification metrics it implies.
@@ -38,11 +42,19 @@ Table 5.2 reports the confusion matrix at the default 0.5 classification thresho
 | Recall | 0.263 |
 | F1-score | 0.345 |
 
+![Figure 5.2: Confusion matrix at the default 0.5 threshold.](figures/fig5-3-confusion-matrix.png)
+
+Figure 5.2 renders Table 5.2 as a heatmap, which makes the asymmetry between the two error types visually immediate in a way the table's numbers alone require a moment's arithmetic to notice: the false-negative cell (28, bids the model wrongly calls Lost) is nearly three times the size of the false-positive cell (10, bids the model wrongly calls Won). This asymmetry is the same class-imbalance effect discussed below, shown here as a shape rather than only as a derived recall figure.
+
 The most important pattern in Table 5.2 is the gap between precision (0.500) and recall (0.263) for the Won class: of the 38 bids the test set actually recorded as won, the model's default 0.5-threshold prediction correctly flags only 10, missing 28. This is a direct, expected consequence of class imbalance (He and Garcia [@he2009learning], Section 2.1): with a base win rate of roughly 30%, a threshold of 0.5 is conservative relative to the base rate, and the model, like most classifiers trained under imbalance without explicit reweighting, tends to under-predict the minority class at that threshold even when, as the AUC result shows, it ranks genuinely winnable bids above genuinely losing ones reasonably well. This is precisely why AUC, a threshold-independent ranking measure, is reported as the primary performance figure in Table 5.1 rather than accuracy or the default-threshold F1-score: a BU stakeholder using this tool in practice would not be bound to the 0.5 threshold, and could instead choose a lower threshold (flagging more bids as "competitive" at the cost of more false positives) depending on how the BU wants to trade off pursuing more opportunities against spending more proposal effort on bids that ultimately lose. This threshold-selection trade-off is not resolved by this thesis and is identified in Chapter 7 as a concrete next step for making the tool more directly actionable.
 
 ## Global SHAP Feature Importance
 
 Table 5.3 reports the full global SHAP ranking, computed as the mean absolute SHAP value per feature across all 500 bids (Chapter 4).
+
+![Figure 5.3: Global SHAP feature importance, all thirteen features, sorted.](figures/fig5-2-shap-importance.png)
+
+Figure 5.3 plots the same ranking as Table 5.3. Read as a shape rather than as thirteen individual numbers, it shows a visible break after the fifth feature (security credentials, at 0.2683): the top five features cluster at values from roughly 0.15 to 0.36, then the remaining eight drop to a comparatively flat band under 0.10, with only a gentle decline from one to the next. This two-tier structure is itself a finding worth reporting independently of the exact rank ordering within either tier: it suggests the model's predictions are driven predominantly by a small core of five features, with the remaining eight contributing real but comparatively minor and more interchangeable signal, a pattern consistent with the data generator's own design (Chapter 3), where a smaller number of features carry deliberately larger encoded weights and three specific interaction terms are concentrated among this same top tier (relationship history, pre-RFP engagement, security credentials, and portfolio similarity all appear in at least one of the three encoded interactions).
 
 **Table 5.3: Global SHAP feature importance (all 500 bids)**
 
