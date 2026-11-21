@@ -7,4 +7,6 @@ toc: true
 toc-depth: 3
 numbersections: true
 linkcolor: blue
+link-citations: true
+link-bibliography: true
 ---
