@@ -1,0 +1,298 @@
+\hypertarget{literature-review}{%
+\chapter{Literature Review}\label{literature-review}}
+
+This chapter reviews four bodies of work that this thesis draws on:
+machine learning applied to sales- and bid-opportunity prediction;
+tree-based ensemble classifiers and the trade-offs between them;
+explainable AI, specifically SHAP, as a mechanism for turning a model's
+output into something a business stakeholder can act on; and Design
+Science Research together with CRISP-DM as the methodological
+scaffolding for building and evaluating the artefact. The chapter closes
+by identifying the specific gap this thesis addresses: the combination
+of these four threads has not, to the author's knowledge, been applied
+to bid-competitiveness prediction in the video game co-development
+industry.
+
+\hypertarget{machine-learning-for-sales-and-bid-opportunity-prediction}{%
+\section{Machine Learning for Sales and Bid-Opportunity
+Prediction}\label{machine-learning-for-sales-and-bid-opportunity-prediction}}
+
+Predicting whether a commercial opportunity will be won is a
+well-established problem in enterprise sales analytics, and the closest
+published analogues to this thesis's problem come from that literature
+rather than from the game industry specifically. Yan et al.
+\citep{yan2015sales}, working with IBM Research on data from a top-500
+enterprise, frame the task as win-propensity prediction: estimating the
+probability that an open sales opportunity will close within a given
+time window. Their central methodological point is one this thesis
+inherits directly: business-to-business (B2B) opportunity data is small
+relative to consumer-scale datasets, noisy, and drawn from a market that
+shifts over the period the data covers, all of which constrain how much
+accuracy any model can realistically achieve and argue against treating
+a single point accuracy figure as the measure of success. The same
+constraint applies, likely more severely, to a single engineering BU's
+resolved bid history, which is the premise this thesis's synthetic-data
+approach is built to test under controlled conditions (Chapter 3).
+
+Rezazadeh \citep{rezazadeh2020generalized} reports a generalised
+ensemble-modelling workflow for B2B sales prediction built on Microsoft
+Azure Machine Learning and evaluated on a consulting firm's historical
+opportunity data, with a data-enrichment and feature-engineering stage
+treated as integral to the pipeline rather than as a preprocessing
+afterthought. This supports the structural choice made in this thesis's
+own pipeline (Chapter 4) to treat feature engineering as its own
+CRISP-DM stage rather than folding it into model training. Zahid et al.
+\citep{zahid2021predicting} extend the basic win/loss framing by
+splitting losses into three distinct classes, no bid, customer did not
+pursue, and lost to competition, and report 85\% accuracy with an
+average AUC of 0.94 for B2B tendering data once class imbalance is
+handled. Their multi-class treatment is a useful pointer for future work
+(Chapter 7): the dataset generator built for this thesis already
+distinguishes Won from Lost but, consistent with their finding that loss
+\emph{reasons} carry separate decision-relevant information, does not
+yet separate ``we chose not to bid'' from ``we bid and lost,'' a
+distinction the Engineering BU would likely want in a production version
+of this tool.
+
+Two methodological lessons recur across this literature and shape how
+this thesis evaluates its own model in Chapter 5. First, raw accuracy is
+a poor summary statistic for a class-imbalanced win/loss problem,
+because a model that always predicts the majority class (``Lost'') can
+post misleadingly high accuracy while never identifying a single win; He
+and Garcia \citep{he2009learning}, in their survey of learning from
+imbalanced data, make the same point in general terms and recommend
+threshold-independent measures such as the area under the ROC curve
+(AUC) and probability-calibration measures such as the Brier score as
+more informative summaries, both of which this thesis reports alongside
+accuracy for that reason. Second, every one of these papers works with
+real but \emph{confidential} organisational data that cannot be
+published or independently re-examined, which is a structural problem
+for reproducibility in this research area generally and is one of the
+reasons, discussed fully in Chapter 3, that this thesis instead builds
+and publishes a synthetic dataset whose generating process is fully
+disclosed.
+
+\hypertarget{tree-based-ensemble-classifiers-for-tabular-prediction-problems}{%
+\section{Tree-Based Ensemble Classifiers for Tabular Prediction
+Problems}\label{tree-based-ensemble-classifiers-for-tabular-prediction-problems}}
+
+Bid-level features of the kind described in Section 1.3, a mixture of
+categorical fields (client segment, project type), ordinal fields
+(relationship history), and continuous fields (price position, effort),
+is a textbook tabular-data classification problem, and the dominant
+family of models for this problem class remains tree-based ensembles
+rather than deep learning. Breiman's Random Forest
+\citep{breiman2001random} averages many decision trees, each trained on
+a bootstrap-resampled subset of the data and a random subset of features
+at each split, trading a small amount of bias for a substantial
+reduction in variance relative to a single tree; it is robust to
+irrelevant features, requires comparatively little hyperparameter
+tuning, and handles the mix of feature types in this problem natively,
+which is why it was specified as a candidate algorithm in this thesis's
+original proposal (Section 1.6).
+
+Gradient boosting, introduced by Friedman \citep{friedman2001greedy},
+takes a different approach to the same underlying idea of combining many
+weak learners: rather than averaging independently trained trees, it
+fits each new tree to the residual error of the ensemble built so far,
+so that the ensemble is built as a stagewise, additive approximation
+that directly minimises a chosen loss function. XGBoost
+\citep{chen2016xgboost} is an engineering-optimised implementation of
+gradient boosting that adds regularisation terms to the objective, a
+more careful treatment of missing values, and substantial training-speed
+improvements, and was the second algorithm specified in this thesis's
+original proposal. In practice, Random Forest and gradient-boosted
+variants (including XGBoost and scikit-learn's own
+\texttt{GradientBoostingClassifier}) tend to perform comparably on
+small-to-medium tabular datasets, with the gap between them typically
+smaller than the gap between either and a well-tuned linear model on
+genuinely non-linear data, and smaller again than the variance
+introduced by dataset size and noise. This thesis's choice to build
+around scikit-learn's \texttt{GradientBoostingClassifier}, a direct
+implementation of Friedman's \citeyearpar{friedman2001greedy} algorithm,
+rather than running the originally proposed Random Forest-versus-XGBoost
+comparison, is a scoping decision made for the reasons given in Section
+1.6, not a claim that gradient boosting is definitively superior for
+this problem; Chapter 7 identifies the comparison as the most
+immediately valuable piece of future work precisely because the
+literature does not settle the question in advance.
+
+A second, independent reason tree ensembles rather than linear models
+are the right default for this problem is that bid competitiveness
+plausibly involves interaction effects rather than a purely additive
+combination of features, for example a weak project-portfolio match may
+matter far more for a brand-new client than for a client with a strong
+prior relationship. Tree-based models capture such interactions natively
+through their split structure, where a linear or logistic model would
+require those interaction terms to be specified by hand in advance. This
+consideration directly motivated the synthetic data generator's design
+(Chapter 3), which deliberately encodes several such interaction effects
+so that the modelling pipeline has a genuine reason to need a non-linear
+learner rather than a toy problem a linear model could solve equally
+well.
+
+\hypertarget{explainable-ai-and-shap-in-business-decision-support}{%
+\section{Explainable AI and SHAP in Business Decision
+Support}\label{explainable-ai-and-shap-in-business-decision-support}}
+
+A model that outputs a win probability without any account of \emph{why}
+is of limited use to a bid-review meeting: a business development lead
+who is told ``62\%'' and nothing else has no way to check the number
+against what they already know, challenge it, or act differently because
+of it. This is the motivation for pairing the predictive model with an
+explanation method rather than treating prediction as the end goal,
+which is the premise behind RQ3 (Section 1.4).
+
+SHAP (SHapley Additive exPlanations), introduced by Lundberg and Lee
+\citep{lundberg2017unified}, addresses this by adapting the Shapley
+value, a concept from cooperative game theory that fairly distributes a
+total payoff among players based on their marginal contribution across
+all possible coalitions, to the problem of attributing a model's
+prediction to its input features. For a single prediction, SHAP assigns
+each feature a signed contribution such that the contributions sum
+exactly to the difference between that prediction and the model's
+average prediction across the training data; this additive,
+exact-decomposition property is what distinguishes it from earlier
+feature-importance methods, which typically report only a global ranking
+with no guarantee that per-instance explanations are internally
+consistent. For tree ensembles specifically, Lundberg and Lee's TreeSHAP
+algorithm computes these exact Shapley values in polynomial rather than
+exponential time, which is what makes SHAP computationally practical for
+the hundreds of predictions this thesis's pipeline explains (Chapter 4)
+rather than only a handful.
+
+Published applications of SHAP in business decision-support contexts
+remain comparatively recent but are growing. Olan et al.
+\citep{olan2024enabling} review the use of explainable AI, with SHAP as
+a central example, inside supply-chain decision-support systems, and
+report that explainability has been instrumental in enabling
+organisations to act on model output with confidence rather than
+treating it as an opaque score; their framing of SHAP's role, making a
+model's reasoning available for human review rather than only its
+output, is the same framing this thesis adopts for RQ3 and for the
+dashboard design in Chapter 4. The pattern observed across this
+literature, including Olan et al.'s own account, is that published SHAP
+applications concentrate in a small number of domains (credit risk,
+supply chains, retail cross-selling, and clinical prediction) and that
+bid- or proposal-level win prediction in any industry, let alone video
+game co-development specifically, does not yet appear in this
+literature. That absence is itself part of the gap this thesis
+addresses.
+
+This thesis's use of SHAP serves two distinct purposes that the
+literature above generally treats separately. The first is per-bid
+explanation: showing a decision-maker which features pushed a specific
+proposal's predicted win probability up or down, which is the direct
+analogue of Olan et al.'s supply-chain use case. The second, more
+specific to this thesis's design, is using SHAP's \emph{global}
+feature-ranking output as a structured object to compare against the
+Engineering BU's own documented hypotheses about what drives
+competitiveness (RQ1), turning the explanation method into an instrument
+for checking a model against domain expertise rather than only for
+explaining the model's output to an end user. This comparative use of
+SHAP, model-derived ranking against a priori domain hypotheses, is the
+thesis's clearest point of methodological contribution relative to the
+reviewed literature, and is developed fully in Chapter 3's discussion of
+the hypothesis-comparison design and evaluated in Chapter 5.
+
+\hypertarget{design-science-research-and-crisp-dm-as-methodological-frameworks}{%
+\section{Design Science Research and CRISP-DM as Methodological
+Frameworks}\label{design-science-research-and-crisp-dm-as-methodological-frameworks}}
+
+This thesis is framed as Design Science Research (DSR), a research
+paradigm concerned with building and evaluating artefacts that address
+an identified organisational problem, as distinct from behavioural
+research, which seeks to explain or predict phenomena without building
+anything. Hevner et al. \citep{hevner2004design} set out seven
+guidelines for DSR in information systems research, of which three are
+directly load-bearing for how this thesis is structured: the research
+must produce a viable, purposeful artefact (Guideline 1); the artefact
+must be rigorously evaluated to demonstrate its utility (Guideline 3);
+and the research process itself, not only its output, must be clearly
+and repeatably documented (Guideline 7). Chapters 4 and 5 of this thesis
+are organised directly around the first two of these guidelines,
+describing the artefact's construction and then its evaluation as
+distinct, sequential activities, and the full disclosure of the
+synthetic-data generation process in Chapter 3 and Appendix A is this
+thesis's response to the third.
+
+Peffers et al. \citep{peffers2007design} operationalise DSR into six
+concrete process steps: problem identification and motivation,
+definition of objectives for a solution, design and development,
+demonstration, evaluation, and communication. This thesis follows that
+sequence structurally: Chapter 1 covers problem identification and
+motivation and the definition of objectives; Chapter 3 (methodology) and
+Chapter 4 (design and implementation) cover design and development;
+Chapter 4's description of the working dashboard and scorer constitutes
+demonstration; Chapter 5 covers evaluation; and this thesis document
+itself, together with the published artefact, is the communication step.
+Peffers et al.'s framework explicitly allows for a ``problem-centred''
+entry point, where the research begins from a known organisational
+problem rather than from an opportunity noticed in existing technology,
+which matches how this thesis originated, from the Engineering BU's
+stated difficulty in Section 1.2, rather than from a novel algorithmic
+technique in search of an application.
+
+Within the design and development step, CRISP-DM (Cross-Industry
+Standard Process for Data Mining) \citep{chapman2000crispdm} provides
+the specific process model this thesis follows for the
+data-and-modelling portion of the work. CRISP-DM structures a data
+mining project into six phases, business understanding, data
+understanding, data preparation, modelling, evaluation, and deployment,
+applied iteratively rather than strictly linearly. Schröer et al.'s
+systematic review of CRISP-DM applications \citep{schroer2021systematic}
+finds it remains the de facto standard process model across a wide range
+of application domains more than two decades after its publication,
+which supports treating it as the appropriate choice here rather than a
+more recent alternative; their review also notes that most published
+applications adapt CRISP-DM's phases to their specific domain rather
+than applying it unmodified, which this thesis does explicitly in
+Chapter 3 by mapping each CRISP-DM phase onto a concrete, named stage of
+the pipeline described in Chapter 4.
+
+Using DSR and CRISP-DM together, as this thesis does, is a natural
+pairing rather than a redundant one: DSR provides the outer research
+framework that justifies building an artefact and specifies how it must
+be evaluated as a contribution to knowledge, while CRISP-DM provides the
+inner, domain-specific process discipline for the data mining work that
+sits inside that artefact's ``design and development'' step. Chapter 3
+sets out exactly how the two are nested in this thesis's own process.
+
+\hypertarget{synthesis-and-identified-gap}{%
+\section{Synthesis and Identified
+Gap}\label{synthesis-and-identified-gap}}
+
+Reading these four bodies of work together situates this thesis
+precisely. The sales- and tendering-prediction literature
+\citep{yan2015sales, zahid2021predicting, rezazadeh2020generalized}
+establishes that win-probability prediction from historical opportunity
+data is a tractable, previously validated problem class, but every
+published instance works with confidential, unpublished organisational
+data and, as far as this review found, none addresses the video game
+co-development industry specifically. The tree-ensemble literature
+\citep{breiman2001random, friedman2001greedy, chen2016xgboost}
+establishes Random Forest and gradient boosting as the appropriate
+default model family for this kind of tabular, mixed-type,
+interaction-rich feature set, without settling which specific variant is
+best in advance of testing on the data at hand. The explainability
+literature \citep{lundberg2017unified, olan2024enabling} establishes
+SHAP as a credible, increasingly adopted mechanism for making a
+business-facing model's output actionable, but has not, to this review's
+knowledge, been applied to compare a trained model's findings
+systematically against a business unit's own documented a priori
+hypotheses, which is precisely what RQ1 does. The methodology literature
+\citep{hevner2004design, peffers2007design, chapman2000crispdm, schroer2021systematic}
+provides a well-established process for building and evaluating exactly
+this kind of artefact, but offers no domain-specific guidance for
+proposal bidding in creative-industry outsourcing.
+
+The gap this thesis addresses, then, is not a gap in any one of these
+four literatures individually, each is mature on its own terms, but the
+absence of their combination applied to this specific, previously
+unstudied domain: a DSR-grounded, CRISP-DM-structured pipeline that
+predicts bid competitiveness for video game co-development proposals,
+uses SHAP both to explain individual predictions and to systematically
+check the model against the Engineering BU's own stated assumptions, and
+packages the result as a working, demonstrable artefact rather than a
+modelling exercise reported only in tables. Chapter 3 now turns to the
+methodology used to fill that gap.

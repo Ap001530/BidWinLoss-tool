@@ -9,8 +9,11 @@ The system is organised as a linear pipeline with four stages, each implemented 
 ```
 data/generate_synthetic_bids.py   →  data/synthetic_bids.csv
 src/train_model.py                →  outputs/model_results.json
-dashboard/make_tables.py          →  dashboard/tables/*.json  (+ docs/data/*.json)
-dashboard/index.html, docs/index.html  (read the tables above and render the artefact)
+dashboard/make_tables.py          →  dashboard/tables/*.json
+                                      (+ docs/data/*.json)
+dashboard/index.html, docs/index.html
+                                   →  reads the tables above,
+                                      renders the artefact
 ```
 
 `outputs/model_results.json` is the single source of truth for every number the artefact displays: model performance metrics, the global SHAP ranking, the SHAP-versus-hypothesis comparison, per-bid explanations for a sample of example bids, and the logistic surrogate's coefficients for the scorer. Nothing in the dashboard or the scorer is hand-typed; every figure traces back to this one generated file, which keeps the artefact consistent with the underlying pipeline by construction rather than by manual upkeep.

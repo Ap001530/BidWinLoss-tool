@@ -1,0 +1,292 @@
+\hypertarget{design-and-implementation}{%
+\chapter{Design and Implementation}\label{design-and-implementation}}
+
+This chapter describes how the pipeline and artefact set out in Chapter
+3 were actually built: the overall architecture, the data generation and
+feature engineering implementation, the model training and SHAP
+explanation pipeline, the design and implementation of the interactive
+dashboard, and the design of the live what-if scorer, including the
+specific reason a second model was needed to support it.
+
+\hypertarget{system-architecture}{%
+\section{System Architecture}\label{system-architecture}}
+
+The system is organised as a linear pipeline with four stages, each
+implemented as an independently runnable script and each consuming only
+the previous stage's output file, so that any stage can be re-run and
+inspected in isolation.
+
+\begin{verbatim}
+data/generate_synthetic_bids.py   →  data/synthetic_bids.csv
+src/train_model.py                →  outputs/model_results.json
+dashboard/make_tables.py          →  dashboard/tables/*.json
+                                      (+ docs/data/*.json)
+dashboard/index.html, docs/index.html
+                                   →  reads the tables above,
+                                      renders the artefact
+\end{verbatim}
+
+\texttt{outputs/model\_results.json} is the single source of truth for
+every number the artefact displays: model performance metrics, the
+global SHAP ranking, the SHAP-versus-hypothesis comparison, per-bid
+explanations for a sample of example bids, and the logistic surrogate's
+coefficients for the scorer. Nothing in the dashboard or the scorer is
+hand-typed; every figure traces back to this one generated file, which
+keeps the artefact consistent with the underlying pipeline by
+construction rather than by manual upkeep.
+
+\begin{figure}
+\centering
+\includegraphics{figures/fig4-1-pipeline-architecture.png}
+\caption{The pipeline's four stages, each consuming only the
+file the previous stage wrote.}
+\end{figure}
+
+Figure 4.1 shows this structure schematically. The shaded stages, data
+generation and results flattening, are the two points where the
+pipeline's output is reshaped into a different data representation
+(synthetic bids into a CSV log; the single nested results file into the
+nine flat tables the Claude Artifact dashboard requires, discussed in
+Section 4.3); the unshaded stages, model training and the dashboard
+itself, are the points where that data is consumed to produce new
+information rather than merely reformatted. This distinction matters for
+where a future extension of the pipeline, for example the Random
+Forest/XGBoost comparison recommended in Chapter 7, would be inserted:
+it replaces logic inside the second stage only, and because every later
+stage reads only that stage's output file rather than depending on how
+the file was produced, no other stage needs to change to accommodate a
+different model being trained there.
+
+\hypertarget{data-generation-and-feature-engineering}{%
+\section{Data Generation and Feature
+Engineering}\label{data-generation-and-feature-engineering}}
+
+\texttt{data/generate\_synthetic\_bids.py} implements the methodology
+set out in Chapter 3: five hundred bids are generated with a fixed
+random seed for reproducibility. Categorical fields (client segment,
+project type, incumbency position) are drawn from fixed marginal
+probability distributions chosen to resemble a plausible BU bid log, for
+example client segment is drawn as 30\% AAA publisher, 32\% mid-size
+publisher, 28\% indie studio, and 10\% platform holder. Correlated
+fields are drawn conditionally: deal origin's inbound probability
+depends on relationship history; pre-proposal engagement's probability
+depends on both deal origin and relationship history; price position is
+drawn as a function of project effort plus independent noise, so that
+larger engagements receive a small realistic discount on average.
+
+The latent win propensity is computed as a weighted sum of each
+feature's encoded effect (the weights, described fully in Chapter 3, are
+derived from the Engineering BU's documented hypotheses), plus the three
+deliberate interaction terms and the Gaussian noise term, passed through
+a logistic transform, with the model's intercept calibrated by binary
+search so the realised win rate lands close to the 30\% target. Label
+noise is then applied by flipping a random 5\% of outcomes. The
+resulting dataset achieved, on this run, a realised win rate of 30.6\%
+across the five hundred bids, close to the 30\% target, which confirms
+the intercept calibration behaved as intended.
+
+Feature engineering for modelling purposes is comparatively light,
+consistent with the dataset having been generated directly in a
+model-ready shape: the thirteen raw features are split into ten numeric
+fields and three categorical fields (client segment, project type,
+incumbency), numeric fields are median-imputed and categorical fields
+are imputed with their most frequent value, and categorical fields are
+one-hot encoded. This preprocessing is implemented once, as a shared
+scikit-learn \texttt{ColumnTransformer}, and reused identically for the
+held-out test split, the 5-fold cross-validation, and the full-data SHAP
+and scorer training, so that no inconsistency can creep in between these
+three uses of the same preprocessing logic.
+
+\hypertarget{model-training}{%
+\section{Model Training}\label{model-training}}
+
+The primary predictive model is a scikit-learn
+\texttt{GradientBoostingClassifier} (Section 2.2; Friedman
+\citeyearpar{friedman2001greedy}), trained with 100 trees, a learning
+rate of 0.04, a maximum tree depth of 2, a minimum of 20 samples per
+leaf, and 0.8 subsampling per tree. These hyperparameters were chosen
+specifically to regularise the model against overfitting on a dataset of
+only 500 rows and thirteen features: shallow trees (depth 2) and a
+conservative learning rate keep any single tree from fitting noise, the
+minimum-leaf-size constraint prevents trees from isolating individual
+training examples, and subsampling introduces additional variance
+reduction in the spirit of Breiman's \citeyearpar{breiman2001random}
+bagging argument, applied here inside a boosting framework. An initial,
+less regularised configuration (150 trees, learning rate 0.07, depth 3)
+was tried first and produced a visibly larger gap between
+cross-validated and held-out performance, a classic overfitting
+signature on a dataset this size; the final, more conservative
+hyperparameters were selected specifically to close that gap, and
+Chapter 5 reports the resulting, more stable performance.
+
+The model is evaluated two ways. A single stratified 75/25 train/test
+split (375 training bids, 125 held-out test bids, stratified to preserve
+the approximately 30\% win rate in both splits) gives a one-shot
+estimate of performance on genuinely unseen data. A separate 5-fold
+stratified cross-validation, refitting the full preprocessing-and-model
+pipeline on each fold independently to avoid any leakage between folds,
+gives a more stable estimate averaged across five different train/test
+partitions. Both are reported in Chapter 5, with the cross-validated
+figure treated as the more reliable headline number precisely because it
+is not sensitive to which 125 bids happened to land in a single test
+split.
+
+\hypertarget{shap-explanation-pipeline}{%
+\section{SHAP Explanation Pipeline}\label{shap-explanation-pipeline}}
+
+SHAP values are computed using the \texttt{shap} package's
+\texttt{TreeExplainer}, applied to a gradient-boosted model refit on the
+full five-hundred-bid dataset (a separate fit from the train/test-split
+model used for performance evaluation, since the explanation pipeline's
+purpose is to characterise what the full available data says about
+feature importance, not to avoid leakage in the way a performance
+estimate must). \texttt{TreeExplainer} computes exact Shapley values for
+tree ensembles in polynomial time, as described in Section 2.3,
+returning one signed contribution per model input feature (after one-hot
+encoding) for every one of the 500 bids.
+
+Two aggregation steps turn this raw, per-encoded-column output into the
+business-readable form the artefact displays. First, one-hot-encoded
+columns belonging to the same original categorical feature (for example,
+the four \texttt{client\_segment\_*} columns) are summed back into a
+single contribution for that feature, so that ``client segment'' appears
+once in the global ranking and in each per-bid explanation, rather than
+as four separate, harder-to-read partial contributions. Second, the
+global feature-importance ranking is computed as the mean absolute SHAP
+value for each feature across all 500 bids, a standard global-importance
+summary that treats positive and negative contributions symmetrically (a
+feature that strongly pushes some bids toward a win and others toward a
+loss is still an important feature, even though its \emph{signed}
+average contribution might be small). This global ranking is the object
+compared against the BU's documented hypothesis ranking (RQ1), using
+Spearman's rank correlation coefficient, computed over all thirteen
+features; Chapter 5 reports the result and discusses the specific
+features where the two rankings diverge most.
+
+For per-bid explanation, eight bids are sampled from the dataset (a
+fixed random seed, so the same eight bids appear in the artefact on
+every pipeline run) and, for each, the top three positive and top three
+negative SHAP contributions (again aggregated to the original feature
+level) are extracted alongside the bid's predicted win probability, its
+actual recorded outcome, and its full raw feature values. The artefact's
+``Example Bids'' section (Section 4.3) displays these eight bids
+directly, letting a reader see not only that the model predicted, say, a
+70\% win probability, but which specific features drove that number up
+or down for that specific bid, and what the bid's full feature profile
+actually was.
+
+\hypertarget{the-interactive-dashboard}{%
+\section{The Interactive Dashboard}\label{the-interactive-dashboard}}
+
+The dashboard is implemented twice from the same
+\texttt{outputs/model\_results.json} source, once as a Claude Artifact
+(a shareable, hosted web page with an interactive-dashboard runtime) and
+once as a static site published via GitHub Pages, so that the artefact
+can be opened either as a quick shareable link or as a permanent,
+self-hosted page with no dependency on a third-party hosting platform.
+Both versions render the same content from the same underlying numbers;
+they differ only in how that data is loaded (the Claude Artifact version
+reads from small, per-section JSON datasets attached to the artefact's
+own data store, a constraint of that hosting platform that required
+restructuring the single nested \texttt{model\_results.json} file into
+nine flat, tabular files, one per dashboard section, since that
+platform's dashboard type only accepts row-array, not nested-object,
+data; the GitHub Pages version fetches the same flat JSON files directly
+over HTTP) and in minor styling (each uses its host's own design-token
+system for colours, fonts, and spacing, so the dashboard looks native to
+wherever it is opened).
+
+The dashboard presents five sections, in order: a synthetic-data
+disclaimer banner, stated up front rather than buried in a footnote,
+repeating the caveat from Chapter 3 in plain language so that nobody
+reading only the artefact, without this thesis, mistakes its numbers for
+findings about real Virtuos bids; a model-performance section showing
+the 5-fold cross-validated and held-out AUC, the Brier score, the
+Spearman rank correlation, the ROC curve, and the confusion matrix, each
+accompanied by a short plain-language explanation of what the metric
+actually measures rather than only its name and value, since an early
+version of the artefact that showed bare metric names and numbers was
+judged, during review, to assume more statistical background than its
+intended BU audience should need; a global SHAP feature-importance bar
+chart; a table comparing the SHAP ranking against the BU's documented
+hypothesis ranking, with each feature's rank shift highlighted; and the
+eight example bids described above, each with an expandable panel
+showing its full feature values alongside its top SHAP factors. Every
+feature name in the dashboard, in the SHAP chart, the hypothesis table,
+the example-bid detail panels, and the scorer described next, carries a
+small clickable control that opens a short, plain-language definition of
+that feature, since several of the raw feature names (for example,
+``incumbency'') are internal modelling shorthand that a non-technical BU
+stakeholder should not be expected to already know.
+
+\hypertarget{the-interactive-what-if-scorer-design-and-the-case-for-a-surrogate-model}{%
+\section{The Interactive What-If Scorer: Design and the Case for a
+Surrogate
+Model}\label{the-interactive-what-if-scorer-design-and-the-case-for-a-surrogate-model}}
+
+RQ3 calls for an artefact a BU stakeholder can use directly, not only
+read, and the most direct way to satisfy that for a bid-competitiveness
+tool is to let a user describe a hypothetical bid, varying its client
+segment, relationship history, price position, and so on, and see an
+estimated win probability update live, together with the factors driving
+that estimate. This component, the scorer, is the thesis's most concrete
+demonstration step in Peffers et al.'s \citeyearpar{peffers2007design}
+DSR process.
+
+Implementing the scorer directly against the gradient-boosted model
+described above would require evaluating a 100-tree ensemble inside the
+browser every time a user moves a slider. This is technically possible,
+trees can be serialised and walked in JavaScript, but it was judged to
+add real implementation complexity and a real risk of subtle bugs (an
+incorrectly ported split condition, for example, would silently produce
+wrong probabilities with no obvious symptom) for a component where the
+thesis's actual design requirement is a different property: that every
+factor the scorer displays be an \emph{exact}, auditable contribution to
+the predicted probability, not an approximation and not a black box,
+however faithfully implemented.
+
+A logistic regression gives this property directly and exactly, because
+its decision function is linear in the standardised input features. A
+second model, a scikit-learn \texttt{LogisticRegression} with its
+numeric features standardised (zero mean, unit variance) and its
+categorical features one-hot encoded, was therefore trained on the full
+dataset specifically for the scorer, using the same preprocessing logic
+as the gradient-boosted model. For this surrogate model, each feature's
+contribution to the predicted log-odds is exactly that feature's
+coefficient multiplied by its standardised value, a single
+multiplication the browser performs directly from the model's stored
+coefficients, with no server round-trip and no approximation. The
+scorer's ``top factors'' display is therefore not an estimate of what
+mattered; it is the literal arithmetic the probability was computed
+from, shown back to the user.
+
+This substitution is made transparent in the artefact itself rather than
+hidden: the scorer section states plainly that it runs a linear
+surrogate rather than the gradient-boosted model used for the
+dashboard's headline performance and SHAP figures, and reports the
+surrogate's own performance (an AUC of 0.773 on the full dataset and
+0.743 under 5-fold cross-validation) so a user can judge how much
+predictive power, if any, is traded away for that exactness. That the
+surrogate's cross-validated AUC (0.743) is close to the gradient-boosted
+model's cross-validated AUC (reported in full in Chapter 5) indicates
+the trade-off is modest for this particular dataset, though this is not
+guaranteed to hold in general and is noted as a limitation in Chapter 6:
+a future real-data deployment of this scorer should re-check whether a
+linear surrogate remains an adequate approximation of the primary
+model's behaviour, or whether the interaction effects the
+gradient-boosted model can capture (Section 2.2) make that trade-off
+larger on real bid data.
+
+\hypertarget{summary}{%
+\section{Summary}\label{summary}}
+
+The complete pipeline, shown in Figure 4.1, runs synthetic data
+generation, grounded in the BU's documented hypotheses and designed
+against trivial circularity; a regularised gradient-boosted classifier,
+evaluated both on a held-out split and by cross-validation; a SHAP
+explanation layer providing both global feature ranking and per-bid
+attribution; and a two-part artefact, a results dashboard and a live,
+exactly-auditable scorer built on a transparent logistic surrogate,
+published in two independently hosted forms. Chapter 5 now evaluates
+each of these components against the research questions set out in
+Chapter 1.

@@ -1,0 +1,301 @@
+\hypertarget{introduction}{%
+\chapter{Introduction}\label{introduction}}
+
+\hypertarget{background-and-context}{%
+\section{Background and Context}\label{background-and-context}}
+
+Game co-development, the practice of a publisher or platform holder
+contracting part or all of a title's production to an external studio,
+has grown into a substantial segment of the video game industry.
+Industry market-research estimates place the global co-development
+services market at approximately USD 4.8 billion in 2025, with
+Asia-Pacific holding the largest regional share at an estimated 38.2\%
+of revenue \citep{marketintelo2025gamecodev}. These figures come from
+vendor market-research reports rather than peer-reviewed sources and
+should be read as order-of-magnitude estimates, not precise
+measurements; segment definitions vary considerably between research
+firms, and comparable reports place narrower slices of the outsourcing
+market at under USD 2 billion for the same year. What the estimates
+agree on, even allowing for that uncertainty, is that co-development is
+a competitive, bid-driven market in which engineering service providers
+such as Virtuos routinely compete for a limited number of large,
+multi-month contracts against other studios.
+
+For an engineering business unit (BU) operating in this market, each bid
+represents a significant commitment of proposal-writing effort,
+technical scoping time, and pricing judgement, well before any revenue
+is realised. The decision of which opportunities to pursue, how to price
+them, and how to shape the proposal to the client's stated and unstated
+priorities is, in most engineering-led organisations, made by combining
+the business development team's commercial judgement with technical
+leads' estimates of feasibility and cost. This is not a criticism
+specific to Virtuos: it is the default mode of operation across
+professional-services and project-based engineering firms, and it has a
+well-documented analogue in enterprise sales, where opportunity
+qualification and win-probability estimation have historically relied on
+sales representatives' subjective assessment of a deal's likelihood to
+close \citep{yan2015sales}.
+
+The consequence of a judgement-based process is not that it performs
+badly on average; experienced business development and engineering leads
+often have good calibrated intuition. The consequence is that the
+judgement is difficult to make consistent across people, difficult to
+audit after the fact, and difficult to improve systematically, because
+the reasoning behind a ``this bid looks competitive'' assessment is
+rarely written down in a form that can be checked against what actually
+happened once the bid was won or lost. Over enough bids, the
+organisation accumulates a resolved history, Won and Lost outcomes, that
+in principle encodes exactly the pattern the team is trying to reason
+about by eye: which combinations of client relationship, pricing, team
+fit, and competitive context tend to produce a win. In practice, that
+history is rarely mined systematically, and the intuitive model stays
+implicit, unverified, and non-transferable between people.
+
+\hypertarget{problem-statement}{%
+\section{Problem Statement}\label{problem-statement}}
+
+Virtuos' Engineering BU does not currently have a quantitative,
+repeatable method for estimating how competitive a given proposal is
+likely to be before it is submitted, or for identifying, after the fact,
+which factors actually distinguished its won bids from its lost ones.
+Bid-level decisions, including whether to pursue an opportunity at all,
+how aggressively to price it, and which parts of the technical narrative
+to emphasise, are made largely on a manual, gut-feeling basis. This
+creates three concrete inefficiencies that motivate this thesis:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Inconsistent pursuit decisions.} Without a shared,
+  data-grounded view of what makes a bid competitive, different business
+  development leads may reach different conclusions about the same
+  opportunity, and the organisation has no systematic way to reconcile
+  those views against historical outcomes.
+\item
+  \textbf{Pricing left to intuition.} Price positioning relative to the
+  market, one of the most consequential and most reversible levers in a
+  proposal, is set without a structured view of how price sensitivity
+  has actually played out across past bids, by client segment or project
+  type.
+\item
+  \textbf{Missed revenue opportunities.} Opportunities that a
+  quantitative read of past patterns would flag as winnable may be
+  under-pursued, while resource-intensive proposals for structurally
+  weak opportunities may be over-invested, because the only signal
+  available is each individual's prior experience.
+\end{enumerate}
+
+A machine-learning model trained on the BU's historical bid outcomes,
+paired with an explanation method that shows \emph{why} the model
+believes a given bid is or is not competitive, offers a way to make the
+implicit pattern explicit, check it against what the BU already
+believes, and put it in front of decision-makers in a form they can
+interrogate rather than simply trust.
+
+\hypertarget{research-aim-and-objectives}{%
+\section{Research Aim and
+Objectives}\label{research-aim-and-objectives}}
+
+The aim of this thesis is to design, build, and evaluate an end-to-end
+decision-support pipeline that predicts the win probability of an
+Engineering BU proposal and explains that prediction in terms a
+non-technical business stakeholder can act on, and to demonstrate that
+pipeline as a working artefact rather than only as a theoretical
+proposal.
+
+The specific objectives are to:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Define and justify a feature set describing a bid (client relationship
+  history, deal origin, pricing position, team and portfolio fit, and
+  competitive context) grounded in the Engineering BU's own documented
+  hypotheses about what drives competitiveness.
+\item
+  Build a supervised classification pipeline that predicts the
+  probability a proposal is won, following the CRISP-DM process
+  \citep{chapman2000crispdm} end to end from data understanding through
+  to a working artefact.
+\item
+  Apply SHAP (SHapley Additive exPlanations) \citep{lundberg2017unified}
+  to the trained model to produce both a global ranking of which
+  features actually drive its predictions and a per-bid explanation of
+  why a specific proposal scores as it does.
+\item
+  Compare that SHAP-derived ranking systematically against the BU's own
+  documented hypotheses about what makes a bid competitive, to surface
+  where the two agree and, more importantly, where they diverge.
+\item
+  Package the pipeline's output as an interactive artefact, a results
+  dashboard and a what-if bid scorer, that a BU stakeholder can use
+  directly, and evaluate that artefact against the research questions
+  below.
+\end{enumerate}
+
+\hypertarget{research-questions}{%
+\section{Research Questions}\label{research-questions}}
+
+\textbf{RQ1 (Feature Identification).} What bid-level features, drawn
+from client relationship history, deal origin, pre-proposal engagement,
+pricing position, team and portfolio fit, and competitive context, most
+effectively predict a co-development proposal's competitive outcome, and
+how does the model's own ranking of those features compare with the
+Engineering BU's documented assumptions about what matters?
+
+\textbf{RQ2 (Model Development).} Within a CRISP-DM-structured workflow,
+how accurately and how robustly can a supervised classification model
+distinguish competitive from uncompetitive proposals under realistic
+constraints, specifically a modest sample size, class imbalance toward
+losses, and noisy, partially overlapping feature effects, and what does
+that accuracy imply about the ceiling on what a purely
+historical-pattern model can achieve for this problem?
+
+\textbf{RQ3 (Artefact Demonstration).} How does an interactive,
+explanation-driven dashboard, combining aggregate model evaluation,
+global and per-bid SHAP explanations, and a live what-if scorer, convert
+a trained model's output into decision-support information that an
+Engineering BU stakeholder can use and trust, and what does building and
+exercising that artefact reveal about the practical requirements for
+deploying this kind of tool?
+
+These three research questions correspond, respectively, to the data and
+feature-engineering stage of the pipeline, the modelling stage, and the
+deployment and human-facing stage, and are addressed in Chapters 4
+(Design and Implementation) and 5 (Evaluation) after the methodological
+groundwork is laid in Chapter 3.
+
+\hypertarget{significance-of-the-study}{%
+\section{Significance of the Study}\label{significance-of-the-study}}
+
+This thesis is positioned as Design Science Research (DSR) in the sense
+articulated by Peffers et al. \citep{peffers2007design}: its primary
+contribution is a designed, demonstrable artefact that solves a stated
+organisational problem, evaluated against that problem, rather than a
+purely descriptive or explanatory study. That framing matters for how
+the thesis should be read and judged. The contribution is not a claim
+about universal truths of what wins video game co-development bids; it
+is a validated method, a pipeline that takes a BU's historical bid data
+and its documented competitiveness hypotheses and turns them into a
+working, explainable prediction tool, together with evidence that the
+method behaves correctly and produces decision-relevant output.
+
+Prior work on win-probability modelling in adjacent business domains
+supports the premise that this class of problem is tractable with
+supervised learning, while also setting realistic expectations for its
+limits. Yan et al. \citep{yan2015sales} and Rezazadeh
+\citep{rezazadeh2020generalized} both report that enterprise sales
+win-propensity models trained on modest, noisy, single-organisation
+datasets can meaningfully outperform naive baselines, while cautioning
+that B2B datasets are typically small relative to consumer settings,
+which constrains achievable accuracy. Zahid et al.
+\citep{zahid2021predicting} extend this to tendering specifically,
+showing that a multi-class treatment of loss reasons (no bid, client did
+not pursue, lost to competition) can add decision-relevant nuance beyond
+a flat win and loss label. On the explanation side, Olan et al.
+\citep{olan2024enabling} document growing use of SHAP-based
+explainability inside supply-chain decision-support systems precisely
+because it lets non-technical stakeholders interrogate \emph{why} a
+model produced a given output, which is the same requirement this thesis
+treats as central to RQ3. This thesis extends that line of work to a
+domain, video game co-development bidding, that does not yet have a
+published treatment, and does so with an explicit focus on pairing the
+predictive model with an interactive artefact rather than reporting
+model accuracy alone.
+
+\hypertarget{scope-deviations-from-the-original-proposal-and-limitations}{%
+\section{Scope, Deviations from the Original Proposal, and
+Limitations}\label{scope-deviations-from-the-original-proposal-and-limitations}}
+
+Three scoping decisions, two of which represent deliberate deviations
+from this thesis's original proposal, define what is and is not claimed
+here, and are stated plainly up front rather than left for the reader to
+discover in later chapters.
+
+\textbf{Synthetic data, not real bid records.} No real, resolved Virtuos
+bid data was available for this thesis. The dataset used throughout is
+synthetically generated: feature-to-outcome relationships are encoded by
+the author from the Engineering BU's documented feature hypotheses, with
+added noise, correlation between features, interaction effects, class
+imbalance, and label noise so that the data is not trivially learnable
+(full detail and justification in Chapter 3 and Appendix A). The
+consequence is that this thesis demonstrates that the pipeline correctly
+recovers a known, encoded signal under realistic conditions; it is a
+validation of the method, not a discovery of what actually wins real
+Virtuos bids. Any number reported about feature importance or model
+accuracy in Chapters 4 and 5 should be read with that distinction in
+mind, and the artefact itself carries this caveat visibly rather than
+only in the written thesis.
+
+\textbf{A single gradient-boosted model, not a Random Forest versus
+XGBoost comparison.} The original thesis topic specified comparing
+Random Forest and XGBoost as candidate classifiers. During
+implementation, the pipeline was instead built and evaluated around a
+single gradient-boosted tree ensemble (scikit-learn's
+\texttt{GradientBoostingClassifier}), paired with a logistic-regression
+surrogate used specifically to drive the artefact's interactive scorer
+(Chapter 4 explains why a second, linear model was needed for that
+component). This is a deliberate narrowing of scope, made to keep the
+modelling, explanation, and artefact-building effort proportionate to a
+single-semester thesis, and it is treated in Chapter 6 as a limitation
+with a concrete recommendation: a Random Forest and XGBoost comparison
+is identified there as the most immediately valuable piece of future
+work, not discarded as out of scope for the research questions
+themselves, since RQ2 is framed around classification accuracy and
+robustness rather than around any one algorithm family.
+
+\textbf{An interactive web dashboard, not a Power BI dashboard.} The
+original proposal specified Power BI, refreshed through an MLOps
+pipeline, as the artefact's delivery mechanism. The delivered artefact
+is instead a self-contained, interactive web dashboard (built as HTML,
+CSS and JavaScript, with D3.js for charting) embedding both the results
+view required by RQ3 and a live, client-side what-if bid scorer,
+published both as a shareable Claude Artifact and as a static site
+hosted on GitHub Pages. This substitution was made for three practical
+reasons, elaborated in Chapter 3: it removes a Power BI Desktop/Service
+licensing dependency that would otherwise gate reviewers' ability to
+open the artefact at all; it allows the scorer's probability calculation
+to run as an exact, auditable client-side computation rather than
+through a Power BI data-refresh cycle; and it kept iteration speed
+compatible with building the artefact and the thesis in parallel. The
+trade-off this incurs, namely that Power BI's native enterprise
+deployment, row-level security, and scheduled-refresh features are not
+demonstrated, is treated explicitly as a limitation in Chapter 6,
+alongside a concrete description of what porting the current pipeline's
+output to Power BI would involve.
+
+Beyond these three points, the thesis is scoped to a single business
+unit (Engineering) within a single organisation (Virtuos), to the
+specific feature set described in Chapter 3, and to a proof-of-concept
+level of artefact maturity: production deployment considerations such as
+authentication, audit logging, and integration with a live CRM are out
+of scope.
+
+\hypertarget{structure-of-the-thesis}{%
+\section{Structure of the Thesis}\label{structure-of-the-thesis}}
+
+The remainder of this thesis is organised as follows. \textbf{Chapter 2}
+reviews the literature on machine learning for bid- and
+sales-opportunity prediction, explainable AI and SHAP in business
+decision support, and Design Science Research and CRISP-DM as
+methodological frameworks, situating this thesis's contribution relative
+to that work. \textbf{Chapter 3} sets out the methodology in full: the
+Design Science Research process followed, the CRISP-DM stages as applied
+to this project, the synthetic data generation methodology and its
+justification, and a fuller account of the three scoping deviations
+introduced in Section 1.6. \textbf{Chapter 4} describes the design and
+implementation of the pipeline and artefact: the feature engineering,
+the model training and SHAP explanation pipeline, and the architecture
+of the interactive dashboard and scorer. \textbf{Chapter 5} reports the
+evaluation: quantitative model performance (AUC, Brier score, precision,
+recall, F1), the SHAP-versus-hypothesis comparison, and a qualitative
+assessment of the artefact against RQ3. \textbf{Chapter 6} discusses
+what the results mean, the limitations introduced by the synthetic-data
+and scoping decisions, and the threats to validity. \textbf{Chapter 7}
+concludes with a summary of the contribution and a concrete set of
+recommendations for future work, led by moving the pipeline onto real
+bid data. Appendices provide the full synthetic-data generation
+methodology, the complete feature glossary used throughout the artefact,
+and selected code listings.

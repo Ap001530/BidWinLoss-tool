@@ -1,0 +1,62 @@
+\documentclass[12pt,oneside]{report}
+
+% Compile this with XeLaTeX (Overleaf: Menu -> Compiler -> XeLaTeX), not pdfLaTeX:
+% the thesis text uses Unicode symbols directly (sigma, rho, en/em dashes are not
+% used, but the minus sign U+2212 and Greek letters in running prose are), which
+% XeLaTeX's native Unicode handling renders without extra packages or escaping.
+
+% ---- Page geometry (adjust to your university's required margins) ----
+\usepackage[a4paper,margin=1in]{geometry}
+
+% ---- Fonts and spacing ----
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}   % metric-compatible Times New Roman clone; free, bundled with TeX Live
+\usepackage{setspace}
+\onehalfspacing             % matches the Word draft; \doublespacing or \singlespacing to change
+
+% ---- Tables, figures, links ----
+\usepackage{calc}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\setkeys{Gin}{width=0.85\linewidth,keepaspectratio}  % default size for every \includegraphics (figures are generated wider than the text column)
+\usepackage[hyphens]{url}
+\usepackage{microtype}
+\usepackage[htt]{hyphenat}  % lets long \texttt{} file paths break inside narrow table cells
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+% ---- Bibliography (natbib: swap \bibliographystyle below for a different citation style) ----
+\usepackage{natbib}
+\bibliographystyle{apalike}  % apalike reads closest to the Word draft's Chicago author-date style
+
+% Pandoc-generated lists use \tightlist; define it since we assemble chapters
+% as fragments rather than through pandoc's own standalone template.
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ---- Front matter ----
+\title{Predictive Market Intelligence for Engineering Proposals in the Video Game Co-Development Industry \\[0.5em]
+\large A Design Science Research Study of a Bid-Competitiveness Prediction Pipeline for Virtuos' Engineering Business Unit}
+\author{[Your full name]}
+\date{[Submission date]}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\listoffigures
+
+\input{chapters/01-introduction}
+\input{chapters/02-literature-review}
+\input{chapters/03-methodology}
+\input{chapters/04-design-implementation}
+\input{chapters/05-evaluation}
+\input{chapters/06-discussion}
+\input{chapters/07-conclusion}
+
+\bibliography{references}
+
+\input{chapters/08-appendices}
+
+\end{document}
